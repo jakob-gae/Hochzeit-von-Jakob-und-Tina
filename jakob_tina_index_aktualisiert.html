@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f1e9"><meta name="description" content="Die Hochzeit von Jakob und Tina am 25. September 2027">
+<title>Jakob & Tina – 25.09.2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+#rsvp .attendee-entry{border:1px solid rgba(95,105,82,.22);border-radius:12px;padding:1rem;margin:1rem 0;background:rgba(255,255,255,.42)}
+#rsvp .attendee-entry label{display:block;margin:.75rem 0}
+#rsvp .attendee-entry input,#rsvp .attendee-entry textarea{display:block;width:100%;box-sizing:border-box;margin-top:.35rem}
+#rsvp .guest-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:1rem 0}
+#rsvp .guest-heading button{cursor:pointer}
+#rsvp .hp-field{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+#rsvp button:disabled{opacity:.65;cursor:wait}
+</style>
+</head><body>
+<header class="header"><a class="logo" href="#start">J <i>&</i> T</a><button class="menu" aria-label="Menü öffnen">☰</button>
+<nav><a href="#ablauf">Ablauf</a><a href="#faq">FAQ</a><a href="#rueckmeldung">Rückmeldung</a><a href="#kontakt">Kontakt</a><a href="#geschenke">Geschenke</a><a href="#fotos">Fotos</a></nav></header>
+<main>
+<section class="hero section" id="start">
+<div class="placeholder hero-image"><b>♡</b><span>Platzhalter für euer gemeinsames Foto</span><small>Hier später euer Lieblingsbild einsetzen</small></div>
+<p class="eyebrow">WIR HEIRATEN</p><h1>Jakob <i>&</i> Tina</h1><p class="date">25. September 2027 · Echterdingen</p>
+<p class="intro">Wir freuen uns riesig, diesen besonderen Tag mit euch zu feiern. Hier findet ihr alle Informationen rund um unsere Hochzeit.</p>
+<a class="button dark" href="#ablauf">Zum Tagesablauf</a>
+<div class="countdown-wrap"><p class="eyebrow">DER COUNTDOWN LÄUFT</p><div class="countdown">
+<div><strong id="days">—</strong><small>Tage</small></div><div><strong id="hours">—</strong><small>Stunden</small></div><div><strong id="minutes">—</strong><small>Minuten</small></div><div><strong id="seconds">—</strong><small>Sekunden</small></div></div></div>
+<p class="scroll">Schön, dass ihr da seid ↓</p></section>
+<section class="section tint" id="ablauf"><div class="heading"><p class="eyebrow">DER 25. SEPTEMBER 2027</p><h2>Unser Hochzeitstag</h2><p>Ein Tag voller schöner Begegnungen, gemeinsamer Momente und guter Stimmung.</p></div>
+<div class="timeline">
+<article><time>14:00</time><div><h3>Kirchliche Trauung</h3><p>Wir sagen Ja – in der Kirche in Echterdingen.</p><a href="https://maps.app.goo.gl/VLvdL9RYa2nHUecA8" target="_blank" rel="noopener">Kirche auf Google Maps ↗</a></div></article>
+<article><time>15:00</time><div><h3>Sektempfang & Hochzeitstorte</h3><p>Wir stoßen gemeinsam an und genießen die Hochzeitstorte. Für das Fingerfood-Buffet freuen wir uns über eure Beiträge.</p><a href="#faq">Infos zum Mithelfen ↓</a></div></article>
+<article><time>17:00</time><div><h3>Gemeinsamer Aufbruch</h3><p>Wir laufen gemeinsam zur Hochzeitslocation.</p><a href="https://maps.app.goo.gl/jkcqsG2SmhdjmjxV8" target="_blank" rel="noopener">Weg zur Location auf Google Maps ↗</a></div></article>
+<article><time>18:00</time><div><h3>Programmstart</h3><p>Wir feiern im großen Saal der Location, Bismarckstraße 3, Echterdingen.</p><a href="https://maps.app.goo.gl/jkcqsG2SmhdjmjxV8" target="_blank" rel="noopener">Location auf Google Maps ↗</a></div></article>
+<article><time>24:00</time><div><h3>Mitternachtssnack</h3><p>Eine kleine Stärkung für alle Nachtschwärmer.</p></div></article></div>
+<div class="note"><b>✳</b><p><strong>Ein kleiner Hinweis</strong><br>Wir gehen um 17:00 Uhr gemeinsam von der Kirche zur Feierlocation. Plant den gemeinsamen Fußweg bitte mit ein.</p></div></section>
+<section class="section" id="faq"><div class="heading"><p class="eyebrow">GUT ZU WISSEN</p><h2>Häufige Fragen</h2><p>Hier haben wir die wichtigsten Infos für euch gesammelt.</p></div>
+<div class="faqs">
+<details><summary>Was ist der Dresscode?</summary><p>Kommt wie ihr wollt, aber schön. Wir möchten, dass ihr euch wohlfühlt!</p></details>
+<details><summary>Was wünschen wir uns zur Hochzeit?</summary><p>Wir freuen uns vor allem, wenn ihr dabei seid! Wenn ihr eine Geschenkidee habt, freuen wir uns natürlich darüber. Falls nicht, findet ihr unter <a href="#geschenke">Geschenkeliste</a> ein paar Wünsche für unseren gemeinsamen Haushalt.</p></details>
+<details><summary>Kann ich beim Sektempfang mithelfen?</summary><p>Sehr gerne! Für unser Fingerfood-Buffet nach der Kirche könnt ihr eure Beiträge hier eintragen:</p><a class="button outline placeholder-link" href="#">Link zur Fingerfood-Liste folgt</a><small>Der Google-Docs- oder Doodle-Link wird ergänzt, sobald er erstellt ist.</small></details>
+<details><summary>Ich habe noch eine Frage. An wen kann ich mich wenden?</summary><p>Schaut gerne im <a href="#kontakt">Kontaktbereich</a> vorbei. Dort findet ihr unsere Kontaktdaten und die unserer Trauzeugen Pascal und Lydia.</p></details></div></section>
+<section class="section tint" id="rueckmeldung"><div class="heading"><p class="eyebrow">BITTE BIS 25. JULI 2027</p><h2>Seid ihr dabei?</h2><p>Wir freuen uns auf eure Rückmeldung bis spätestens <strong>25.07.2027</strong>.</p></div>
+<form id="rsvp"><fieldset><legend>Deine Rückmeldung</legend>
+<div class="choices"><label><input type="radio" name="attendance" value="yes" checked> Ja, wir kommen!</label><label><input type="radio" name="attendance" value="no"> Leider können wir nicht kommen.</label></div>
+<div id="yes-fields">
+  <p class="hint">Tragt bitte alle Personen ein, für die ihr gemeinsam antwortet. Für jede Person könnt ihr Essenswünsche und Unverträglichkeiten angeben.</p>
+  <div id="attendees">
+    <article class="attendee-entry">
+      <label>Name der Person 1<input class="attendee-name" type="text" required maxlength="100" placeholder="Vor- und Nachname"></label>
+      <label>Essenswünsche (optional)<textarea class="attendee-food" rows="2" maxlength="500" placeholder="z. B. vegetarisch oder vegan"></textarea></label>
+      <label>Unverträglichkeiten (optional)<textarea class="attendee-allergy" rows="2" maxlength="500" placeholder="Was sollten wir beachten?"></textarea></label>
+    </article>
+  </div>
+  <div class="guest-heading"><span>Weitere Personen</span><button type="button" id="add-guest">+ Person hinzufügen</button></div>
+  <p class="hint">Ihr könnt weitere Personen hinzufügen und bei Bedarf wieder entfernen.</p>
+  <p class="hint">Für Beiträge zum Fingerfood beim Sektempfang findet ihr hier bald die separate <a class="placeholder-link" href="#">Essensliste</a>.</p>
+</div>
+<div id="no-fields" hidden><label for="message">Möchtet ihr uns noch etwas mitteilen? (freiwillig)</label><textarea id="message" rows="4" maxlength="1000" placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea></div>
+<label for="email">E-Mail-Adresse (optional)</label><input id="email" type="email" maxlength="200" placeholder="name@beispiel.de">
+<!-- Honeypot gegen einfache automatisierte Spam-Einträge -->
+<div class="hp-field" aria-hidden="true"><label>Nicht ausfüllen<input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
+<button class="button dark submit" type="submit">Rückmeldung absenden</button>
+<p class="hint">Eure Angaben werden in einer privaten Google-Tabelle gespeichert und sind nicht für andere Gäste sichtbar.</p><p id="result" role="status" aria-live="polite"></p>
+</fieldset></form></section>
+<section class="section" id="kontakt"><div class="heading"><p class="eyebrow">WIR SIND FÜR EUCH DA</p><h2>Kontakt</h2><p>Fragen, Überraschungen oder Ideen für das Programm? Meldet euch gerne bei uns oder unseren Trauzeugen.</p></div>
+<div class="contacts">
+<article><div class="placeholder portrait"><b>♡</b><small>Foto von Jakob & Tina</small></div><h3>Jakob & Tina</h3><p>Das Brautpaar</p><small>Kontaktdaten folgen</small></article>
+<article><div class="placeholder portrait"><b>✳</b><small>Foto von Pascal</small></div><h3>Pascal</h3><p>Trauzeuge</p><small>Ansprechpartner für Programm & Überraschungen<br>Kontaktdaten folgen</small></article>
+<article><div class="placeholder portrait"><b>✳</b><small>Foto von Lydia</small></div><h3>Lydia</h3><p>Trauzeugin</p><small>Ansprechpartnerin für Programm & Überraschungen<br>Kontaktdaten folgen</small></article></div></section>
+<section class="section tint" id="geschenke"><div class="gift">
+<div class="placeholder gift-image"><b>♡</b><small>Platzhalter für ein Geschenk- oder Zuhause-Foto</small></div><div><p class="eyebrow">EINE KLEINIGKEIT FÜR UNS</p><h2>Geschenkeliste</h2><p>Das schönste Geschenk ist, dass ihr mit uns feiert. Falls ihr uns trotzdem eine Freude machen möchtet, haben wir hier ein paar Wünsche für unseren gemeinsamen Haushalt gesammelt.</p><p>Einfach einen Wunsch auswählen, im Geschäft oder online kaufen und anschließend auf der Wunschliste als gekauft markieren.</p><a class="button dark" href="https://www.nocake.de/user/jakob-gaenzle/jakob-und-tinas-wunschzettel" target="_blank" rel="noopener">Zu unserer Wunschliste ↗</a><p class="code">Zugangscode: <strong>Hochzeit2027</strong></p></div></div></section>
+<section class="section" id="fotos"><div class="heading"><p class="eyebrow">ERINNERUNGEN</p><h2>Unser Hochzeitstag in Bildern</h2><p>Ihr habt schöne Fotos von unserem Hochzeitstag gemacht? Wir freuen uns, wenn ihr sie mit uns teilt!</p></div>
+<a class="button outline placeholder-link" href="#">Fotos hochladen – Link folgt</a><p class="hint">Der Google-Drive-Link zum Hochladen wird hier ergänzt.</p>
+<div class="gallery"><div class="placeholder"><b>♡</b><small>Foto 1</small></div><div class="placeholder"><b>✳</b><small>Foto 2</small></div><div class="placeholder"><b>♡</b><small>Foto 3</small></div></div></section>
+</main><footer><div>Jakob <i>&</i> Tina</div><p>25. September 2027 · Echterdingen</p><a href="#start">Zurück nach oben ↑</a></footer>
+<script>
+(() => {
+  // WICHTIG: Nach Veröffentlichung des Google-Apps-Script-Web-Apps hier die /exec-URL eintragen.
+  const RSVP_ENDPOINT = "HIER_GOOGLE_APPS_SCRIPT_WEB_APP_URL_EINFUEGEN";
+
+  const menuButton = document.querySelector(".menu");
+  const nav = document.querySelector(".header nav");
+  if (menuButton && nav) menuButton.addEventListener("click", () => nav.classList.toggle("open"));
+  if (nav) nav.querySelectorAll("a").forEach(a => a.addEventListener("click", () => nav.classList.remove("open")));
+
+  // Countdown bis zum Hochzeitstag (Ortszeit in Deutschland).
+  function updateCountdown() {
+    const target = new Date("2027-09-25T14:00:00+02:00").getTime();
+    const distance = Math.max(0, target - Date.now());
+    const units = {
+      days: Math.floor(distance / 86400000),
+      hours: Math.floor(distance % 86400000 / 3600000),
+      minutes: Math.floor(distance % 3600000 / 60000),
+      seconds: Math.floor(distance % 60000 / 1000)
+    };
+    Object.entries(units).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(value).padStart(2, "0");
+    });
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  const form = document.getElementById("rsvp");
+  if (!form) return;
+  const yesFields = document.getElementById("yes-fields");
+  const noFields = document.getElementById("no-fields");
+  const attendees = document.getElementById("attendees");
+  const addButton = document.getElementById("add-guest");
+  const result = document.getElementById("result");
+  let attendeeCount = 1;
+
+  function updateAttendanceFields() {
+    const yes = form.querySelector('input[name="attendance"]:checked')?.value === "yes";
+    yesFields.hidden = !yes;
+    noFields.hidden = yes;
+    attendees.querySelectorAll("input, textarea").forEach(el => el.required = yes && el.classList.contains("attendee-name"));
+  }
+  form.querySelectorAll('input[name="attendance"]').forEach(r => r.addEventListener("change", updateAttendanceFields));
+  updateAttendanceFields();
+
+  addButton.addEventListener("click", () => {
+    attendeeCount += 1;
+    const card = document.createElement("article");
+    card.className = "attendee-entry";
+    card.innerHTML = `
+      <div class="guest-heading"><strong>Person ${attendeeCount}</strong>
+        <button type="button" class="remove-guest" aria-label="Person entfernen">Entfernen</button></div>
+      <label>Name der Person ${attendeeCount}<input class="attendee-name" type="text" required maxlength="100" placeholder="Vor- und Nachname"></label>
+      <label>Essenswünsche (optional)<textarea class="attendee-food" rows="2" maxlength="500" placeholder="z. B. vegetarisch oder vegan"></textarea></label>
+      <label>Unverträglichkeiten (optional)<textarea class="attendee-allergy" rows="2" maxlength="500" placeholder="Was sollten wir beachten?"></textarea></label>`;
+    card.querySelector(".remove-guest").addEventListener("click", () => card.remove());
+    attendees.appendChild(card);
+    card.querySelector("input").focus();
+  });
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    result.textContent = "";
+    const attendance = form.querySelector('input[name="attendance"]:checked').value;
+    const honeypot = document.getElementById("website").value;
+    if (honeypot) return;
+
+    if (RSVP_ENDPOINT.startsWith("HIER_")) {
+      result.textContent = "Das Formular ist vorbereitet. Die Speicherung wird aktiv, sobald die Google-Apps-Script-Web-App-URL eingetragen wurde.";
+      return;
+    }
+
+    const payload = {
+      attendance,
+      email: document.getElementById("email").value.trim(),
+      message: document.getElementById("message").value.trim(),
+      attendees: attendance === "yes" ? [...attendees.querySelectorAll(".attendee-entry")].map(entry => ({
+        name: entry.querySelector(".attendee-name").value.trim(),
+        food: entry.querySelector(".attendee-food").value.trim(),
+        allergies: entry.querySelector(".attendee-allergy").value.trim()
+      })).filter(person => person.name) : [],
+      submittedAt: new Date().toISOString(),
+      website: honeypot
+    };
+
+    if (attendance === "yes" && payload.attendees.length === 0) {
+      result.textContent = "Bitte tragt mindestens eine Person mit Namen ein.";
+      return;
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Wird gesendet …";
+    try {
+      // text/plain + no-cors vermeidet eine CORS-Vorabfrage bei Google Apps Script.
+      // Die Antwort ist im Browser nicht lesbar; der Eintrag wird in Google Sheets geprüft.
+      await fetch(RSVP_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      result.textContent = "Vielen Dank! Eure Rückmeldung wurde abgeschickt. Bei Fragen meldet euch gerne direkt bei Jakob und Tina.";
+      form.reset();
+      attendees.innerHTML = "";
+      attendeeCount = 0;
+      addButton.click();
+      updateAttendanceFields();
+    } catch (error) {
+      result.textContent = "Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina.";
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Rückmeldung absenden";
+    }
+  });
+})();
+</script></body></html>

@@ -558,9 +558,22 @@
         throw new Error(data.error || "Unbekannter Fehler");
       }
 
-      result.textContent = attending
-        ? 'Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns. <a href="#faq-sektempfang">Kann ich beim Sektempfang mithelfen?</a>'
-        : 'Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!';
+      if (attending) {
+  result.textContent =
+    "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns. ";
+
+  const link = document.createElement("a");
+  link.href = "#faq-sektempfang";
+  link.textContent = "Kann ich beim Sektempfang mithelfen?";
+  link.addEventListener("click", () => {
+    document.getElementById("faq-sektempfang").open = true;
+  });
+
+  result.append(link);
+} else {
+  result.textContent =
+    "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
+}
       
       // Formular zurücksetzen: nur Person 1 behalten
       [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c => c.remove());

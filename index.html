@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="de">
 <head>
@@ -48,6 +49,7 @@
   height: 1px;
   overflow: hidden;
 }
+#rsvp [hidden] { display: none !important; }
 #rsvp button:disabled {
   opacity: .65;
   cursor: wait;
@@ -211,7 +213,7 @@
     <p>Wir freuen uns auf eure Rückmeldung bis spätestens <strong>25.07.2027</strong>.</p>
   </div>
 
-  <form id="rsvp">
+  <form id="rsvp" class="rsvp-form">
     <fieldset>
       <legend>Deine Rückmeldung</legend>
 
@@ -229,15 +231,13 @@
       <!-- Für Zusage UND Absage identisches Personenformular -->
       <div id="people-fields">
         <p class="hint">
-          Tragt bitte alle Personen ein, die ihr anmelden möchtet –
-          unabhängig davon, ob ihr zu- oder absagt.
-          Für jede Person könnt ihr Essenswünsche und Unverträglichkeiten gemeinsam angeben.
+          Tragt bitte alle Personen ein, für die ihr zu- oder absagt.
         </p>
 
         <div id="attendees">
           <article class="attendee-entry">
             <label>
-              Name der Person 1
+              <span class="name-label-text">Name der Person 1</span>
               <input
                 class="attendee-name"
                 type="text"
@@ -246,7 +246,7 @@
                 placeholder="Vor- und Nachname">
             </label>
 
-            <label>
+            <label class="food-field">
               Essenswünsche und Unverträglichkeiten (optional)
               <textarea
                 class="attendee-food-allergies"
@@ -272,12 +272,14 @@
         </p>
       </div>
 
-      <label for="message">Möchtet ihr uns noch etwas mitteilen? (freiwillig)</label>
-      <textarea
-        id="message"
-        rows="4"
-        maxlength="1000"
-        placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea>
+      <div id="message-field" hidden>
+        <label for="message">Eine kurze Nachricht an uns (optional)</label>
+        <textarea
+          id="message"
+          rows="4"
+          maxlength="1000"
+          placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea>
+      </div>
 
       <!-- Honeypot gegen einfache automatisierte Spam-Einträge -->
       <div class="hp-field" aria-hidden="true">
@@ -431,13 +433,27 @@
   const attendees = document.getElementById("attendees");
   const addButton = document.getElementById("add-guest");
   const result = document.getElementById("result");
+  const messageField = document.getElementById("message-field");
 
-  let attendeeCount = 1;
+  function isAttending() {
+    return form.querySelector('input[name="attendance"]:checked').value === "yes";
+  }
 
+  // Zusage: Essenswünsche sichtbar | Absage: Nachrichtenfeld sichtbar
   function updateAttendanceFields() {
-    // Dasselbe Personenformular bei Zu- und Absage.
-    attendees.querySelectorAll(".attendee-name").forEach(el => {
-      el.required = true;
+    const attending = isAttending();
+    attendees.querySelectorAll(".food-field").forEach(el => { el.hidden = !attending; });
+    messageField.hidden = attending;
+    attendees.querySelectorAll(".attendee-name").forEach(el => { el.required = true; });
+  }
+
+  // Nummerierung nach Hinzufügen/Entfernen neu setzen
+  function renumberAttendees() {
+    attendees.querySelectorAll(".attendee-entry").forEach((entry, i) => {
+      const n = i + 1;
+      const title = entry.querySelector(".attendee-title");
+      if (title) title.textContent = "Person " + n;
+      entry.querySelector(".name-label-text").textContent = "Name der Person " + n;
     });
   }
 
@@ -449,21 +465,17 @@
 
   // Weitere Personen hinzufügen
   addButton.addEventListener("click", () => {
-    attendeeCount += 1;
-
     const card = document.createElement("article");
     card.className = "attendee-entry";
 
     card.innerHTML = `
       <div class="guest-heading">
-        <strong>Person ${attendeeCount}</strong>
-        <button type="button" class="remove-guest" aria-label="Person entfernen">
-          Entfernen
-        </button>
+        <strong class="attendee-title"></strong>
+        <button type="button" class="remove-guest" aria-label="Person entfernen">Entfernen</button>
       </div>
 
       <label>
-        Name der Person ${attendeeCount}
+        <span class="name-label-text"></span>
         <input
           class="attendee-name"
           type="text"
@@ -472,7 +484,7 @@
           placeholder="Vor- und Nachname">
       </label>
 
-      <label>
+      <label class="food-field">
         Essenswünsche und Unverträglichkeiten (optional)
         <textarea
           class="attendee-food-allergies"
@@ -484,35 +496,37 @@
 
     card.querySelector(".remove-guest").addEventListener("click", () => {
       card.remove();
+      renumberAttendees();
     });
 
     attendees.appendChild(card);
+    renumberAttendees();
+    updateAttendanceFields();
     card.querySelector("input").focus();
   });
 
   // Formular absenden
   form.addEventListener("submit", async event => {
     event.preventDefault();
-
     result.textContent = "";
 
-    const attendance = form.querySelector(
-      'input[name="attendance"]:checked'
-    ).value;
-
     const honeypot = document.getElementById("website").value;
-
     if (honeypot) return;
 
-    // Personen bei Zusage UND Absage erfassen
+    const attending = isAttending();
+
     const payload = {
-      attendance,
-      message: document.getElementById("message").value.trim(),
+      attendance: attending ? "yes" : "no",
+
+      // Nachricht nur bei Absage, Essenswünsche nur bei Zusage
+      message: attending ? "" : document.getElementById("message").value.trim(),
 
       attendees: [...attendees.querySelectorAll(".attendee-entry")]
         .map(entry => ({
           name: entry.querySelector(".attendee-name").value.trim(),
-          foodAndAllergies: entry.querySelector(".attendee-food-allergies").value.trim()
+          foodAndAllergies: attending
+            ? entry.querySelector(".attendee-food-allergies").value.trim()
+            : ""
         }))
         .filter(person => person.name),
 
@@ -527,36 +541,45 @@
     }
 
     const submitButton = form.querySelector('button[type="submit"]');
-
     submitButton.disabled = true;
     submitButton.textContent = "Wird gesendet …";
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+
     try {
-      await fetch(RSVP_ENDPOINT, {
+      // Kein "no-cors": nur so kann die Antwort des Skripts gelesen werden.
+      // Ohne eigenen Content-Type wird text/plain gesendet (kein Preflight nötig).
+      const response = await fetch(RSVP_ENDPOINT, {
         method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
 
-      result.textContent =
-        "Vielen Dank! Eure Rückmeldung wurde abgeschickt. Bei Fragen meldet euch gerne direkt bei Jakob und Tina.";
+      const data = await response.json();
 
+      if (!data.ok) {
+        throw new Error(data.error || "Unbekannter Fehler");
+      }
+
+      result.textContent = attending
+        ? "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch!"
+        : "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
+
+      // Formular zurücksetzen: nur Person 1 behalten
+      [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c => c.remove());
       form.reset();
-      attendees.innerHTML = "";
-      attendeeCount = 0;
-
-      // Ein leeres erstes Personenfeld wiederherstellen
-      addButton.click();
+      renumberAttendees();
       updateAttendanceFields();
+      result.scrollIntoView({ behavior: "smooth", block: "center" });
 
     } catch (error) {
+      console.error(error);
       result.textContent =
         "Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina.";
 
     } finally {
+      clearTimeout(timeout);
       submitButton.disabled = false;
       submitButton.textContent = "Rückmeldung absenden";
     }

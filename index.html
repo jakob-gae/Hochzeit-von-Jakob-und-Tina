@@ -90,33 +90,68 @@ function updateAttendanceFields(){const attending=isAttending();attendees.queryS
 function renumberAttendees(){attendees.querySelectorAll(".attendee-entry").forEach((entry,i)=>{const n=i+1,title=entry.querySelector(".attendee-title");if(title)title.textContent="Person "+n;entry.querySelector(".name-label-text").textContent="Name der Person "+n})}
 form.querySelectorAll('input[name="attendance"]').forEach(r=>r.addEventListener("change",updateAttendanceFields));updateAttendanceFields();
 addButton.addEventListener("click",()=>{const card=document.createElement("article");card.className="attendee-entry";card.innerHTML=`<div class="guest-heading"><strong class="attendee-title"></strong><button type="button" class="remove-guest" aria-label="Person entfernen">Entfernen</button></div><label><span class="name-label-text"></span><input class="attendee-name" type="text" required maxlength="100" placeholder="Vor- und Nachname"></label><label class="food-field">Essenswünsche und Unverträglichkeiten (optional)<textarea class="attendee-food-allergies" rows="3" maxlength="1000" placeholder="z. B. vegetarisch, vegan oder Unverträglichkeiten"></textarea></label>`;card.querySelector(".remove-guest").addEventListener("click",()=>{card.remove();renumberAttendees()});attendees.appendChild(card);renumberAttendees();updateAttendanceFields();card.querySelector("input").focus()});
-form.addEventListener("submit",async event=>{event.preventDefault();result.replaceChildren();const honeypot=document.getElementById("website").value;if(honeypot)return;const attending=isAttending();const payload={attendance:attending?"yes":"no",message:attending?"":document.getElementById("message").value.trim(),attendees:[...attendees.querySelectorAll(".attendee-entry")].map(entry=>({name:entry.querySelector(".attendee-name").value.trim(),foodAndAllergies:attending?entry.querySelector(".attendee-food-allergies").value.trim():""})).filter(person=>person.name),submittedAt:new Date().toISOString(),website:honeypot};if(payload.attendees.length===0){result.textContent="Bitte tragt mindestens eine Person mit Namen ein.";attendees.querySelector(".attendee-name")?.focus();return}
-const submitButton=form.querySelector('button[type="submit"]');submitButton.disabled=true;submitButton.textContent="Wird gesendet …";const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);
-try{const response=await fetch(RSVP_ENDPOINT,{method:"POST",body:JSON.stringify(payload),signal:controller.signal}),data=await response.json();if(!data.ok)throw new Error(data.error||"Unbekannter Fehler");
-if(attending){result.append(document.createTextNode("Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns. "));const link=document.createElement("a");link.href="#faq-sektempfang";link.className="rsvp-faq-link";link.textContent="Kann ich beim Sektempfang mithelfen?";link.addEventListener("click",()=>{document.getElementById("faq-sektempfang").open=true});result.append(link)}else{result.textContent="Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!"}
+form.addEventListener("submit",async event=>{
+event.preventDefault();
+result.replaceChildren();
+const honeypot=document.getElementById("website").value;
+if(honeypot)return;
+const attending=isAttending();
+const payload={
+attendance:attending?"yes":"no",
+message:attending?"":document.getElementById("message").value.trim(),
+attendees:[...attendees.querySelectorAll(".attendee-entry")].map(entry=>({
+name:entry.querySelector(".attendee-name").value.trim(),
+foodAndAllergies:attending?entry.querySelector(".attendee-food-allergies").value.trim():""
+})).filter(person=>person.name),
+submittedAt:new Date().toISOString(),
+website:honeypot
+};
+if(payload.attendees.length===0){
+result.textContent="Bitte tragt mindestens eine Person mit Namen ein.";
+attendees.querySelector(".attendee-name")?.focus();
+return;
+}
+const submitButton=form.querySelector('button[type="submit"]');
+submitButton.disabled=true;
+submitButton.textContent="Wird gesendet …";
+const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);
+try{
+const response=await fetch(RSVP_ENDPOINT,{method:"POST",body:JSON.stringify(payload),signal:controller.signal});
+const data=await response.json();
+if(!data.ok)throw new Error(data.error||"Unbekannter Fehler");
+
+if(attending){
+result.append(document.createTextNode("Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch!"));
+result.append(document.createElement("br"));
+result.append(document.createElement("br"));
+const link=document.createElement("a");
+link.href="#faq-sektempfang";
+link.className="rsvp-faq-link";
+link.textContent="Über Beiträge zum Fingerfood freuen wir uns!";
+link.addEventListener("click",()=>{
+document.getElementById("faq-sektempfang").open=true;
+});
+result.append(link);
+}else{
+result.textContent="Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
+}
 
 [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c=>c.remove());
 form.reset();
 renumberAttendees();
 updateAttendanceFields();
 
-if (attending) {
-  const fingerfood = document.getElementById("faq-sektempfang");
-  fingerfood.open = true;
-
-  setTimeout(() => {
-    fingerfood.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-  }, 300);
-} else {
-  result.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
+if(!attending){
+result.scrollIntoView({behavior:"smooth",block:"center"});
 }
-}catch(error){console.error(error);result.textContent="Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina."}finally{clearTimeout(timeout);submitButton.disabled=false;submitButton.textContent="Rückmeldung absenden"}
+}catch(error){
+console.error(error);
+result.textContent="Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina.";
+}finally{
+clearTimeout(timeout);
+submitButton.disabled=false;
+submitButton.textContent="Rückmeldung absenden";
+}
 });
 })();
 </script>

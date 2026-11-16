@@ -559,9 +559,9 @@
       }
 
       result.textContent = attending
-        ? "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns"
-        : "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
-
+        ? 'Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns. <a href="#faq-sektempfang">Kann ich beim Sektempfang mithelfen?</a>'
+        : 'Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!';
+      
       // Formular zurücksetzen: nur Person 1 behalten
       [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c => c.remove());
       form.reset();

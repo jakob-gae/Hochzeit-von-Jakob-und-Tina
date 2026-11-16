@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="de">
 <head>
@@ -93,7 +94,28 @@ form.addEventListener("submit",async event=>{event.preventDefault();result.repla
 const submitButton=form.querySelector('button[type="submit"]');submitButton.disabled=true;submitButton.textContent="Wird gesendet …";const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);
 try{const response=await fetch(RSVP_ENDPOINT,{method:"POST",body:JSON.stringify(payload),signal:controller.signal}),data=await response.json();if(!data.ok)throw new Error(data.error||"Unbekannter Fehler");
 if(attending){result.append(document.createTextNode("Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch! Über Beiträge zum Fingerfood freuen wir uns. "));const link=document.createElement("a");link.href="#faq-sektempfang";link.className="rsvp-faq-link";link.textContent="Kann ich beim Sektempfang mithelfen?";link.addEventListener("click",()=>{document.getElementById("faq-sektempfang").open=true});result.append(link)}else{result.textContent="Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!"}
-[...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c=>c.remove());form.reset();renumberAttendees();updateAttendanceFields();result.scrollIntoView({behavior:"smooth",block:"center"})
+
+[...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c=>c.remove());
+form.reset();
+renumberAttendees();
+updateAttendanceFields();
+
+if (attending) {
+  const fingerfood = document.getElementById("faq-sektempfang");
+  fingerfood.open = true;
+
+  setTimeout(() => {
+    fingerfood.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }, 300);
+} else {
+  result.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
 }catch(error){console.error(error);result.textContent="Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina."}finally{clearTimeout(timeout);submitButton.disabled=false;submitButton.textContent="Rückmeldung absenden"}
 });
 })();

@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="de"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -45,20 +46,22 @@
 <form id="rsvp"><fieldset><legend>Deine Rückmeldung</legend>
 <div class="choices"><label><input type="radio" name="attendance" value="yes" checked> Ja, wir kommen!</label><label><input type="radio" name="attendance" value="no"> Leider können wir nicht kommen.</label></div>
 <div id="yes-fields">
-  <p class="hint">Tragt bitte alle Personen ein, für die ihr gemeinsam antwortet. Für jede Person könnt ihr Essenswünsche und Unverträglichkeiten angeben.</p>
+  <p class="hint">Tragt bitte alle Personen ein, für die ihr gemeinsam zusagt. Für jede Person könnt ihr Essenswünsche und Unverträglichkeiten gemeinsam angeben.</p>
   <div id="attendees">
     <article class="attendee-entry">
       <label>Name der Person 1<input class="attendee-name" type="text" required maxlength="100" placeholder="Vor- und Nachname"></label>
-      <label>Essenswünsche (optional)<textarea class="attendee-food" rows="2" maxlength="500" placeholder="z. B. vegetarisch oder vegan"></textarea></label>
-      <label>Unverträglichkeiten (optional)<textarea class="attendee-allergy" rows="2" maxlength="500" placeholder="Was sollten wir beachten?"></textarea></label>
+      <label>Essenswünsche und Unverträglichkeiten (optional)<textarea class="attendee-food-allergies" rows="3" maxlength="1000" placeholder="z. B. vegetarisch, vegan oder Unverträglichkeiten"></textarea></label>
     </article>
   </div>
   <div class="guest-heading"><span>Weitere Personen</span><button type="button" id="add-guest">+ Person hinzufügen</button></div>
   <p class="hint">Ihr könnt weitere Personen hinzufügen und bei Bedarf wieder entfernen.</p>
   <p class="hint">Für Beiträge zum Fingerfood beim Sektempfang findet ihr hier bald die separate <a class="placeholder-link" href="#">Essensliste</a>.</p>
 </div>
-<div id="no-fields" hidden><label for="message">Möchtet ihr uns noch etwas mitteilen? (freiwillig)</label><textarea id="message" rows="4" maxlength="1000" placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea></div>
-<label for="email">E-Mail-Adresse (optional)</label><input id="email" type="email" maxlength="200" placeholder="name@beispiel.de">
+<div id="no-fields" hidden>
+  <label for="decline-name">Name <input id="decline-name" type="text" maxlength="100" placeholder="Vor- und Nachname"></label>
+  <label for="message">Möchtet ihr uns noch etwas mitteilen? (freiwillig)</label>
+  <textarea id="message" rows="4" maxlength="1000" placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea>
+</div>
 <!-- Honeypot gegen einfache automatisierte Spam-Einträge -->
 <div class="hp-field" aria-hidden="true"><label>Nicht ausfüllen<input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="button dark submit" type="submit">Rückmeldung absenden</button>
@@ -77,15 +80,13 @@
 </main><footer><div>Jakob <i>&</i> Tina</div><p>25. September 2027 · Echterdingen</p><a href="#start">Zurück nach oben ↑</a></footer>
 <script>
 (() => {
-  // WICHTIG: Nach Veröffentlichung des Google-Apps-Script-Web-Apps hier die /exec-URL eintragen.
-  const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbz8vqfJoZh-reSe8XJD2ik7zo6Gv5LeIMZGwAuS5fkyKfub-98JyNloF5AKuw3REirVfw/exec";
+  const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbzREqIRuI1K_Am8slwagRmaWi0lkvOlmN1NTH05ZAen8o0Lh_mEeyLeLZAMtlk2cDSk/exec";
 
   const menuButton = document.querySelector(".menu");
   const nav = document.querySelector(".header nav");
   if (menuButton && nav) menuButton.addEventListener("click", () => nav.classList.toggle("open"));
   if (nav) nav.querySelectorAll("a").forEach(a => a.addEventListener("click", () => nav.classList.remove("open")));
 
-  // Countdown bis zum Hochzeitstag (Ortszeit in Deutschland).
   function updateCountdown() {
     const target = new Date("2027-09-25T14:00:00+02:00").getTime();
     const distance = Math.max(0, target - Date.now());
@@ -116,8 +117,12 @@
     const yes = form.querySelector('input[name="attendance"]:checked')?.value === "yes";
     yesFields.hidden = !yes;
     noFields.hidden = yes;
-    attendees.querySelectorAll("input, textarea").forEach(el => el.required = yes && el.classList.contains("attendee-name"));
+    attendees.querySelectorAll(".attendee-name").forEach(el => {
+      el.required = yes;
+    });
+    document.getElementById("decline-name").required = !yes;
   }
+
   form.querySelectorAll('input[name="attendance"]').forEach(r => r.addEventListener("change", updateAttendanceFields));
   updateAttendanceFields();
 
@@ -129,8 +134,7 @@
       <div class="guest-heading"><strong>Person ${attendeeCount}</strong>
         <button type="button" class="remove-guest" aria-label="Person entfernen">Entfernen</button></div>
       <label>Name der Person ${attendeeCount}<input class="attendee-name" type="text" required maxlength="100" placeholder="Vor- und Nachname"></label>
-      <label>Essenswünsche (optional)<textarea class="attendee-food" rows="2" maxlength="500" placeholder="z. B. vegetarisch oder vegan"></textarea></label>
-      <label>Unverträglichkeiten (optional)<textarea class="attendee-allergy" rows="2" maxlength="500" placeholder="Was sollten wir beachten?"></textarea></label>`;
+      <label>Essenswünsche und Unverträglichkeiten (optional)<textarea class="attendee-food-allergies" rows="3" maxlength="1000" placeholder="z. B. vegetarisch, vegan oder Unverträglichkeiten"></textarea></label>`;
     card.querySelector(".remove-guest").addEventListener("click", () => card.remove());
     attendees.appendChild(card);
     card.querySelector("input").focus();
@@ -143,19 +147,15 @@
     const honeypot = document.getElementById("website").value;
     if (honeypot) return;
 
-    if (RSVP_ENDPOINT.startsWith("HIER_")) {
-      result.textContent = "Das Formular ist vorbereitet. Die Speicherung wird aktiv, sobald die Google-Apps-Script-Web-App-URL eingetragen wurde.";
-      return;
-    }
-
     const payload = {
       attendance,
-      email: document.getElementById("email").value.trim(),
+      name: attendance === "no"
+        ? document.getElementById("decline-name").value.trim()
+        : "",
       message: document.getElementById("message").value.trim(),
       attendees: attendance === "yes" ? [...attendees.querySelectorAll(".attendee-entry")].map(entry => ({
         name: entry.querySelector(".attendee-name").value.trim(),
-        food: entry.querySelector(".attendee-food").value.trim(),
-        allergies: entry.querySelector(".attendee-allergy").value.trim()
+        foodAndAllergies: entry.querySelector(".attendee-food-allergies").value.trim()
       })).filter(person => person.name) : [],
       submittedAt: new Date().toISOString(),
       website: honeypot
@@ -165,13 +165,16 @@
       result.textContent = "Bitte tragt mindestens eine Person mit Namen ein.";
       return;
     }
+    if (attendance === "no" && !payload.name) {
+      result.textContent = "Bitte gebt euren Namen an.";
+      document.getElementById("decline-name").focus();
+      return;
+    }
 
     const submitButton = form.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     submitButton.textContent = "Wird gesendet …";
     try {
-      // text/plain + no-cors vermeidet eine CORS-Vorabfrage bei Google Apps Script.
-      // Die Antwort ist im Browser nicht lesbar; der Eintrag wird in Google Sheets geprüft.
       await fetch(RSVP_ENDPOINT, {
         method: "POST",
         mode: "no-cors",

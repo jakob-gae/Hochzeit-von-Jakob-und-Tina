@@ -146,7 +146,7 @@
       <div>
         <h3>Sektempfang & Hochzeitstorte</h3>
         <p>Wir stoßen gemeinsam an und genießen die Hochzeitstorte. Für das Fingerfood-Buffet freuen wir uns über eure Beiträge.</p>
-        <a href="#faq">Infos zum Mithelfen ↓</a>
+        <a href="#faq-sektempfang" class="open-fingerfood-faq">Infos zum Mithelfen ↓</a>
       </div>
     </article>
 
@@ -209,7 +209,7 @@
       </p>
     </details>
 
-    <details>
+    <details id="faq-sektempfang">
       <summary>Kann ich beim Sektempfang mithelfen?</summary>
       <p>Sehr gerne! Für unser Fingerfood-Buffet nach der Kirche könnt ihr eure Beiträge hier eintragen:</p>
       <a class="button outline placeholder-link" href="#">Link zur Fingerfood-Liste folgt</a>
@@ -248,7 +248,6 @@
         </label>
       </div>
 
-      <!-- Für Zusage UND Absage identisches Personenformular -->
       <div id="people-fields">
         <p class="hint">
           Tragt bitte alle Personen ein, für die ihr zu- oder absagt.
@@ -301,7 +300,6 @@
           placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea>
       </div>
 
-      <!-- Honeypot gegen einfache automatisierte Spam-Einträge -->
       <div class="hp-field" aria-hidden="true">
         <label>
           Nicht ausfüllen
@@ -423,6 +421,24 @@
     });
   }
 
+  // Fingerfood-FAQ öffnen und dorthin scrollen
+  function openFingerfoodFaq(event) {
+    event.preventDefault();
+
+    const faq = document.getElementById("faq-sektempfang");
+    if (!faq) return;
+
+    faq.open = true;
+
+    setTimeout(() => {
+      faq.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  }
+
+  document.querySelectorAll(".open-fingerfood-faq").forEach(link => {
+    link.addEventListener("click", openFingerfoodFaq);
+  });
+
   // Countdown
   function updateCountdown() {
     const target = new Date("2027-09-25T14:00:00+02:00").getTime();
@@ -453,11 +469,11 @@
     const loadCodes = () => {
       try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
     };
+
     const saveCodes = codes => {
       try { localStorage.setItem(STORE_KEY, JSON.stringify(codes)); } catch (e) { /* ignorieren */ }
     };
 
-    // Nur https-Links bzw. relative Bildpfade (z. B. bilder/tasse.jpg) zulassen
     const safeUrl = (value, allowRelative) => {
       const u = String(value || "").trim();
       if (!u) return "";
@@ -484,32 +500,39 @@
       if (!confirm("„" + gift.name + "“ für euch reservieren?")) return;
       button.disabled = true;
       giftStatus.textContent = "";
+
       try {
         const data = await giftApi({ action: "reserveGift", id: gift.id });
         const codes = loadCodes();
         codes[gift.id] = data.code;
         saveCodes(codes);
+
         giftStatus.textContent =
           "Reserviert! Euer Freigabecode: " + data.code +
           " – bitte notieren, falls ihr die Reservierung später aufheben möchtet.";
       } catch (error) {
         giftStatus.textContent = error.message;
       }
+
       await loadGifts();
     }
 
     async function releaseGift(code, button) {
       if (button) button.disabled = true;
       giftStatus.textContent = "";
+
       try {
         await giftApi({ action: "releaseGift", code });
         const codes = loadCodes();
-        Object.keys(codes).forEach(id => { if (codes[id] === code) delete codes[id]; });
+        Object.keys(codes).forEach(id => {
+          if (codes[id] === code) delete codes[id];
+        });
         saveCodes(codes);
         giftStatus.textContent = "Die Reservierung wurde aufgehoben.";
       } catch (error) {
         giftStatus.textContent = error.message;
       }
+
       await loadGifts();
     }
 
@@ -524,7 +547,7 @@
 
       gifts.forEach(gift => {
         const myCode = gift.taken ? codes[gift.id] : null;
-        if (!gift.taken && codes[gift.id]) delete codes[gift.id]; // veralteter Code
+        if (!gift.taken && codes[gift.id]) delete codes[gift.id];
 
         const card = el("article", "gift-card" + (gift.taken ? (myCode ? " mine" : " taken") : ""));
 
@@ -543,6 +566,7 @@
 
         const body = el("div", "gift-body");
         body.append(el("h3", "", gift.name));
+
         if (gift.description) body.append(el("p", "", gift.description));
         if (gift.price) body.append(el("p", "gift-price", gift.price));
 
@@ -552,21 +576,27 @@
         if (!gift.taken) {
           if (linkUrl) {
             const a = el("a", "button outline", "Ansehen ↗");
-            a.href = linkUrl; a.target = "_blank"; a.rel = "noopener";
+            a.href = linkUrl;
+            a.target = "_blank";
+            a.rel = "noopener";
             actions.append(a);
           }
+
           const btn = el("button", "button dark", "Reservieren");
           btn.type = "button";
           btn.addEventListener("click", () => reserveGift(gift, btn));
           actions.append(btn);
+
         } else if (myCode) {
           const box = el("div", "gift-code", "Von euch reserviert. Freigabecode:");
           box.append(el("strong", "", myCode));
           actions.append(box);
+
           const btn = el("button", "button outline", "Reservierung aufheben");
           btn.type = "button";
           btn.addEventListener("click", () => releaseGift(myCode, btn));
           actions.append(btn);
+
         } else {
           const btn = el("button", "button outline", "Bereits reserviert");
           btn.type = "button";
@@ -599,8 +629,15 @@
     document.getElementById("release-btn").addEventListener("click", () => {
       const input = document.getElementById("release-code");
       const code = input.value.trim().toUpperCase();
-      if (!code) { giftStatus.textContent = "Bitte gebt euren Freigabecode ein."; return; }
-      releaseGift(code, null).then(() => { input.value = ""; });
+
+      if (!code) {
+        giftStatus.textContent = "Bitte gebt euren Freigabecode ein.";
+        return;
+      }
+
+      releaseGift(code, null).then(() => {
+        input.value = "";
+      });
     });
 
     loadGifts();
@@ -622,9 +659,16 @@
   // Zusage: Essenswünsche sichtbar | Absage: Nachrichtenfeld sichtbar
   function updateAttendanceFields() {
     const attending = isAttending();
-    attendees.querySelectorAll(".food-field").forEach(el => { el.hidden = !attending; });
+
+    attendees.querySelectorAll(".food-field").forEach(el => {
+      el.hidden = !attending;
+    });
+
     messageField.hidden = attending;
-    attendees.querySelectorAll(".attendee-name").forEach(el => { el.required = true; });
+
+    attendees.querySelectorAll(".attendee-name").forEach(el => {
+      el.required = true;
+    });
   }
 
   // Nummerierung nach Hinzufügen/Entfernen neu setzen
@@ -632,7 +676,9 @@
     attendees.querySelectorAll(".attendee-entry").forEach((entry, i) => {
       const n = i + 1;
       const title = entry.querySelector(".attendee-title");
+
       if (title) title.textContent = "Person " + n;
+
       entry.querySelector(".name-label-text").textContent = "Name der Person " + n;
     });
   }
@@ -698,7 +744,6 @@
     const payload = {
       attendance: attending ? "yes" : "no",
 
-      // Nachricht nur bei Absage, Essenswünsche nur bei Zusage
       message: attending ? "" : document.getElementById("message").value.trim(),
 
       attendees: [...attendees.querySelectorAll(".attendee-entry")]
@@ -728,8 +773,6 @@
     const timeout = setTimeout(() => controller.abort(), 20000);
 
     try {
-      // Kein "no-cors": nur so kann die Antwort des Skripts gelesen werden.
-      // Ohne eigenen Content-Type wird text/plain gesendet (kein Preflight nötig).
       const response = await fetch(RSVP_ENDPOINT, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -742,19 +785,47 @@
         throw new Error(data.error || "Unbekannter Fehler");
       }
 
-      result.textContent = attending
-        ? "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch!"
-        : "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
+      if (attending) {
+        result.replaceChildren();
+
+        result.append(document.createTextNode(
+          "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch!"
+        ));
+
+        result.append(document.createElement("br"));
+        result.append(document.createElement("br"));
+
+        const link = document.createElement("a");
+        link.href = "#faq-sektempfang";
+        link.className = "rsvp-faq-link open-fingerfood-faq";
+        link.textContent = "Über Beiträge zum Fingerfood freuen wir uns!";
+        link.addEventListener("click", openFingerfoodFaq);
+
+        result.append(link);
+
+      } else {
+        result.textContent =
+          "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
+      }
 
       // Formular zurücksetzen: nur Person 1 behalten
-      [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c => c.remove());
+      [...attendees.querySelectorAll(".attendee-entry")]
+        .slice(1)
+        .forEach(c => c.remove());
+
       form.reset();
       renumberAttendees();
       updateAttendanceFields();
-      result.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // Nur bei einer Absage zur Rückmeldung scrollen.
+      // Bei einer Zusage bleibt die aktuelle Scrollposition erhalten.
+      if (!attending) {
+        result.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
 
     } catch (error) {
       console.error(error);
+
       result.textContent =
         "Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina.";
 

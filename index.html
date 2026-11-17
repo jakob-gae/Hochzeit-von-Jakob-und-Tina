@@ -1,405 +1,771 @@
-const SPREADSHEET_ID = "1aFeHuceMVupURE9hLvzwWWGZqKt6GUF2-awFw70o9Hk";
-const SHEET_NAME = "Hochzeits-Rückmeldungen";
-const TIME_ZONE = "Europe/Berlin";
-const MAX_PERSONS = 20;
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f1e9">
+<meta name="description" content="Die Hochzeit von Jakob und Tina am 25. September 2027">
+<title>Jakob & Tina – 25.09.2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 
-// Spalten (Reihenfolge = Reihenfolge in der Tabelle)
-const HEADERS = [
-  "Eingegangen am",                       // A
-  "Antwort",                              // B
-  "Name",                                 // C
-  "Essenswünsche & Unverträglichkeiten",  // D
-  "Nachricht",                            // E
-  "Antwortgruppe"                         // F
-];
-
-
-const VERSION = "2026-11-16-v4-geschenke";
-
-// ==========================================
-// VERSIONS-CHECK: Web-App-URL im Browser öffnen
-// ==========================================
-
-function doGet(e) {
-  try {
-    if (e && e.parameter && e.parameter.action === "gifts") {
-      return json_({ ok: true, gifts: listGifts_() });
-    }
-    return json_({ ok: true, version: VERSION, hinweis: "Rückmelde-Skript ist aktiv." });
-  } catch (err) {
-    console.error(err);
-    return json_({ ok: false, error: String(err.message || err) });
-  }
+<style>
+#rsvp .attendee-entry {
+  border: 1px solid rgba(95,105,82,.22);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: rgba(255,255,255,.42);
 }
+#rsvp .attendee-entry label {
+  display: block;
+  margin: .75rem 0;
+}
+#rsvp .attendee-entry input,
+#rsvp .attendee-entry textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: .35rem;
+}
+#rsvp .guest-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+#rsvp .guest-heading button {
+  cursor: pointer;
+}
+#rsvp .hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+/* Geschenkeliste */
+.gift-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
+.gift-card { background: #fbfaf6; border: 1px solid #d9ddcf; display: flex; flex-direction: column; }
+.gift-card.taken { opacity: .6; }
+.gift-card.mine { opacity: 1; border-color: #89927b; }
+.gift-card .gift-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eee9df; }
+.gift-card .gift-placeholder { aspect-ratio: 4 / 3; border: 0; border-bottom: 1px solid #e2dfd4; }
+.gift-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.gift-body h3 { font: 400 22px "Playfair Display", serif; margin: 0; }
+.gift-body p { margin: 0; color: #73786d; font-size: 13px; }
+.gift-body .gift-price { font-size: 12px; letter-spacing: .06em; color: #69745e; font-weight: 700; }
+.gift-actions { margin-top: auto; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.gift-actions .button { width: 100%; min-height: 42px; }
+.gift-actions .button:disabled { opacity: .6; cursor: not-allowed; }
+.gift-code { background: #e7eadd; padding: 10px 12px; font-size: 12px; color: #59634f; }
+.gift-code strong { display: block; font-size: 20px; letter-spacing: .16em; }
+#gift-status { max-width: 1000px; margin: 22px auto 0; text-align: center; color: #59634f; font-size: 14px; }
+.gift-release { max-width: 480px; margin: 34px auto 0; border-top: 1px solid #d9ddcf; padding-top: 18px; }
+.gift-release summary { cursor: pointer; font-size: 13px; color: #59634f; }
+.gift-release-row { display: flex; gap: 8px; margin-top: 14px; }
+.gift-release-row input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #d9ddcf; background: #fffefa; font: 13px "DM Sans", sans-serif; text-transform: uppercase; letter-spacing: .1em; }
+.gift-release-row .button { min-height: 44px; }
+#rsvp [hidden] { display: none !important; }
+#rsvp button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+</style>
+</head>
 
+<body>
 
-// ==========================================
-// HAUPTFUNKTION: WEBSITE-RÜCKMELDUNGEN
-// ==========================================
+<header class="header">
+  <a class="logo" href="#start">J <i>&</i> T</a>
+  <button class="menu" aria-label="Menü öffnen">☰</button>
+  <nav>
+    <a href="#ablauf">Ablauf</a>
+    <a href="#faq">FAQ</a>
+    <a href="#rueckmeldung">Rückmeldung</a>
+    <a href="#kontakt">Kontakt</a>
+    <a href="#geschenke">Geschenke</a>
+    <a href="#fotos">Fotos</a>
+  </nav>
+</header>
 
-function doPost(e) {
-  try {
-    if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("Keine Formulardaten empfangen.");
+<main>
+
+<section class="hero section" id="start">
+  <div class="placeholder hero-image">
+    <b>♡</b>
+    <span>Platzhalter für euer gemeinsames Foto</span>
+    <small>Hier später euer Lieblingsbild einsetzen</small>
+  </div>
+
+  <p class="eyebrow">WIR HEIRATEN</p>
+  <h1>Jakob <i>&</i> Tina</h1>
+  <p class="date">25. September 2027 · Echterdingen</p>
+  <p class="intro">
+    Wir freuen uns riesig, diesen besonderen Tag mit euch zu feiern.
+    Hier findet ihr alle Informationen rund um unsere Hochzeit.
+  </p>
+
+  <a class="button dark" href="#ablauf">Zum Tagesablauf</a>
+
+  <div class="countdown-wrap">
+    <p class="eyebrow">DER COUNTDOWN LÄUFT</p>
+    <div class="countdown">
+      <div><strong id="days">—</strong><small>Tage</small></div>
+      <div><strong id="hours">—</strong><small>Stunden</small></div>
+      <div><strong id="minutes">—</strong><small>Minuten</small></div>
+      <div><strong id="seconds">—</strong><small>Sekunden</small></div>
+    </div>
+  </div>
+
+  <p class="scroll">Schön, dass ihr da seid ↓</p>
+</section>
+
+<section class="section tint" id="ablauf">
+  <div class="heading">
+    <p class="eyebrow">DER 25. SEPTEMBER 2027</p>
+    <h2>Unser Hochzeitstag</h2>
+    <p>Ein Tag voller schöner Begegnungen, gemeinsamer Momente und guter Stimmung.</p>
+  </div>
+
+  <div class="timeline">
+    <article>
+      <time>14:00</time>
+      <div>
+        <h3>Kirchliche Trauung</h3>
+        <p>Wir sagen Ja – in der Kirche in Echterdingen.</p>
+        <a href="https://maps.app.goo.gl/VLvdL9RYa2nHUecA8" target="_blank" rel="noopener">Kirche auf Google Maps ↗</a>
+      </div>
+    </article>
+
+    <article>
+      <time>15:00</time>
+      <div>
+        <h3>Sektempfang & Hochzeitstorte</h3>
+        <p>Wir stoßen gemeinsam an und genießen die Hochzeitstorte. Für das Fingerfood-Buffet freuen wir uns über eure Beiträge.</p>
+        <a href="#faq">Infos zum Mithelfen ↓</a>
+      </div>
+    </article>
+
+    <article>
+      <time>17:00</time>
+      <div>
+        <h3>Gemeinsamer Aufbruch</h3>
+        <p>Wir laufen gemeinsam zur Hochzeitslocation.</p>
+        <a href="https://maps.app.goo.gl/jkcqsG2SmhdjmjxV8" target="_blank" rel="noopener">Weg zur Location auf Google Maps ↗</a>
+      </div>
+    </article>
+
+    <article>
+      <time>18:00</time>
+      <div>
+        <h3>Programmstart</h3>
+        <p>Wir feiern im großen Saal der Location, Bismarckstraße 3, Echterdingen.</p>
+        <a href="https://maps.app.goo.gl/jkcqsG2SmhdjmjxV8" target="_blank" rel="noopener">Location auf Google Maps ↗</a>
+      </div>
+    </article>
+
+    <article>
+      <time>24:00</time>
+      <div>
+        <h3>Mitternachtssnack</h3>
+        <p>Eine kleine Stärkung für alle Nachtschwärmer.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="note">
+    <b>✳</b>
+    <p>
+      <strong>Ein kleiner Hinweis</strong><br>
+      Wir gehen um 17:00 Uhr gemeinsam von der Kirche zur Feierlocation.
+      Plant den gemeinsamen Fußweg bitte mit ein.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="heading">
+    <p class="eyebrow">GUT ZU WISSEN</p>
+    <h2>Häufige Fragen</h2>
+    <p>Hier haben wir die wichtigsten Infos für euch gesammelt.</p>
+  </div>
+
+  <div class="faqs">
+    <details>
+      <summary>Was ist der Dresscode?</summary>
+      <p>Kommt wie ihr wollt, aber schön. Wir möchten, dass ihr euch wohlfühlt!</p>
+    </details>
+
+    <details>
+      <summary>Was wünschen wir uns zur Hochzeit?</summary>
+      <p>
+        Wir freuen uns vor allem, wenn ihr dabei seid! Wenn ihr eine Geschenkidee habt,
+        freuen wir uns natürlich darüber. Falls nicht, findet ihr unter
+        <a href="#geschenke">Geschenkeliste</a> ein paar Wünsche für unseren gemeinsamen Haushalt.
+      </p>
+    </details>
+
+    <details>
+      <summary>Kann ich beim Sektempfang mithelfen?</summary>
+      <p>Sehr gerne! Für unser Fingerfood-Buffet nach der Kirche könnt ihr eure Beiträge hier eintragen:</p>
+      <a class="button outline placeholder-link" href="#">Link zur Fingerfood-Liste folgt</a>
+      <small>Der Google-Docs- oder Doodle-Link wird ergänzt, sobald er erstellt ist.</small>
+    </details>
+
+    <details>
+      <summary>Ich habe noch eine Frage. An wen kann ich mich wenden?</summary>
+      <p>
+        Schaut gerne im <a href="#kontakt">Kontaktbereich</a> vorbei.
+        Dort findet ihr unsere Kontaktdaten und die unserer Trauzeugen Pascal und Lydia.
+      </p>
+    </details>
+  </div>
+</section>
+
+<section class="section tint" id="rueckmeldung">
+  <div class="heading">
+    <p class="eyebrow">BITTE BIS 25. JULI 2027</p>
+    <h2>Seid ihr dabei?</h2>
+    <p>Wir freuen uns auf eure Rückmeldung bis spätestens <strong>25.07.2027</strong>.</p>
+  </div>
+
+  <form id="rsvp" class="rsvp-form">
+    <fieldset>
+      <legend>Deine Rückmeldung</legend>
+
+      <div class="choices">
+        <label>
+          <input type="radio" name="attendance" value="yes" checked>
+          Ja, wir kommen!
+        </label>
+        <label>
+          <input type="radio" name="attendance" value="no">
+          Leider können wir nicht kommen.
+        </label>
+      </div>
+
+      <!-- Für Zusage UND Absage identisches Personenformular -->
+      <div id="people-fields">
+        <p class="hint">
+          Tragt bitte alle Personen ein, für die ihr zu- oder absagt.
+        </p>
+
+        <div id="attendees">
+          <article class="attendee-entry">
+            <label>
+              <span class="name-label-text">Name der Person 1</span>
+              <input
+                class="attendee-name"
+                type="text"
+                required
+                maxlength="100"
+                placeholder="Vor- und Nachname">
+            </label>
+
+            <label class="food-field">
+              Essenswünsche und Unverträglichkeiten (optional)
+              <textarea
+                class="attendee-food-allergies"
+                rows="3"
+                maxlength="1000"
+                placeholder="z. B. vegetarisch, vegan oder Unverträglichkeiten"></textarea>
+            </label>
+          </article>
+        </div>
+
+        <div class="guest-heading">
+          <span>Weitere Personen</span>
+          <button type="button" id="add-guest">+ Person hinzufügen</button>
+        </div>
+
+        <p class="hint">
+          Ihr könnt beliebig weitere Personen hinzufügen und bei Bedarf wieder entfernen.
+        </p>
+
+        <p class="hint">
+          Für Beiträge zum Fingerfood beim Sektempfang findet ihr hier bald die separate
+          <a class="placeholder-link" href="#">Essensliste</a>.
+        </p>
+      </div>
+
+      <div id="message-field" hidden>
+        <label for="message">Eine kurze Nachricht an uns (optional)</label>
+        <textarea
+          id="message"
+          rows="4"
+          maxlength="1000"
+          placeholder="Eine kurze Nachricht an Jakob und Tina …"></textarea>
+      </div>
+
+      <!-- Honeypot gegen einfache automatisierte Spam-Einträge -->
+      <div class="hp-field" aria-hidden="true">
+        <label>
+          Nicht ausfüllen
+          <input type="text" id="website" tabindex="-1" autocomplete="off">
+        </label>
+      </div>
+
+      <button class="button dark submit" type="submit">Rückmeldung absenden</button>
+
+      <p class="hint">
+        Eure Angaben werden in einer privaten Google-Tabelle gespeichert
+        und sind nicht für andere Gäste sichtbar.
+      </p>
+      <p id="result" role="status" aria-live="polite"></p>
+    </fieldset>
+  </form>
+</section>
+
+<section class="section" id="kontakt">
+  <div class="heading">
+    <p class="eyebrow">WIR SIND FÜR EUCH DA</p>
+    <h2>Kontakt</h2>
+    <p>Fragen, Überraschungen oder Ideen für das Programm? Meldet euch gerne bei uns oder unseren Trauzeugen.</p>
+  </div>
+
+  <div class="contacts">
+    <article>
+      <div class="placeholder portrait"><b>♡</b><small>Foto von Jakob & Tina</small></div>
+      <h3>Jakob & Tina</h3>
+      <p>Das Brautpaar</p>
+      <small>Kontaktdaten folgen</small>
+    </article>
+
+    <article>
+      <div class="placeholder portrait"><b>✳</b><small>Foto von Pascal</small></div>
+      <h3>Pascal</h3>
+      <p>Trauzeuge</p>
+      <small>Ansprechpartner für Programm & Überraschungen<br>Kontaktdaten folgen</small>
+    </article>
+
+    <article>
+      <div class="placeholder portrait"><b>✳</b><small>Foto von Lydia</small></div>
+      <h3>Lydia</h3>
+      <p>Trauzeugin</p>
+      <small>Ansprechpartnerin für Programm & Überraschungen<br>Kontaktdaten folgen</small>
+    </article>
+  </div>
+</section>
+
+<section class="section tint" id="geschenke">
+  <div class="heading">
+    <p class="eyebrow">EINE KLEINIGKEIT FÜR UNS</p>
+    <h2>Geschenkeliste</h2>
+    <p>
+      Das schönste Geschenk ist, dass ihr mit uns feiert. Falls ihr uns trotzdem eine Freude
+      machen möchtet, haben wir hier ein paar Wünsche für unseren gemeinsamen Haushalt gesammelt.
+      Reserviert euch einen Wunsch, damit er nicht doppelt geschenkt wird.
+    </p>
+  </div>
+
+  <div id="gift-list" class="gift-grid" aria-live="polite">
+    <p class="hint">Wunschliste wird geladen …</p>
+  </div>
+  <p id="gift-status" role="status" aria-live="polite"></p>
+
+  <details class="gift-release">
+    <summary>Reservierung mit Freigabecode aufheben</summary>
+    <p class="hint">
+      Die Reservierung ist anonym – wir sehen nicht, wer was ausgewählt hat. Den Code erhaltet ihr
+      beim Reservieren. Auf demselben Gerät findet ihr die Freigabe auch direkt beim Wunsch.
+    </p>
+    <div class="gift-release-row">
+      <input type="text" id="release-code" maxlength="12" placeholder="Freigabecode" autocomplete="off" aria-label="Freigabecode">
+      <button type="button" id="release-btn" class="button outline">Freigeben</button>
+    </div>
+  </details>
+</section>
+
+<section class="section" id="fotos">
+  <div class="heading">
+    <p class="eyebrow">ERINNERUNGEN</p>
+    <h2>Unser Hochzeitstag in Bildern</h2>
+    <p>Ihr habt schöne Fotos von unserem Hochzeitstag gemacht? Wir freuen uns, wenn ihr sie mit uns teilt!</p>
+  </div>
+
+  <a class="button outline placeholder-link" href="#">Fotos hochladen – Link folgt</a>
+  <p class="hint">Der Google-Drive-Link zum Hochladen wird hier ergänzt.</p>
+
+  <div class="gallery">
+    <div class="placeholder"><b>♡</b><small>Foto 1</small></div>
+    <div class="placeholder"><b>✳</b><small>Foto 2</small></div>
+    <div class="placeholder"><b>♡</b><small>Foto 3</small></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div>Jakob <i>&</i> Tina</div>
+  <p>25. September 2027 · Echterdingen</p>
+  <a href="#start">Zurück nach oben ↑</a>
+</footer>
+
+<script>
+(() => {
+  const RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbzREqIRuI1K_Am8slwagRmaWi0lkvOlmN1NTH05ZAen8o0Lh_mEeyLeLZAMtlk2cDSk/exec";
+
+  // Navigation
+  const menuButton = document.querySelector(".menu");
+  const nav = document.querySelector(".header nav");
+
+  if (menuButton && nav) {
+    menuButton.addEventListener("click", () => nav.classList.toggle("open"));
+  }
+
+  if (nav) {
+    nav.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => nav.classList.remove("open"));
+    });
+  }
+
+  // Countdown
+  function updateCountdown() {
+    const target = new Date("2027-09-25T14:00:00+02:00").getTime();
+    const distance = Math.max(0, target - Date.now());
+
+    const units = {
+      days: Math.floor(distance / 86400000),
+      hours: Math.floor(distance % 86400000 / 3600000),
+      minutes: Math.floor(distance % 3600000 / 60000),
+      seconds: Math.floor(distance % 60000 / 1000)
+    };
+
+    Object.entries(units).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(value).padStart(2, "0");
+    });
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Geschenkeliste
+  const giftList = document.getElementById("gift-list");
+  if (giftList) {
+    const giftStatus = document.getElementById("gift-status");
+    const STORE_KEY = "giftCodes";
+
+    const loadCodes = () => {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+    };
+    const saveCodes = codes => {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(codes)); } catch (e) { /* ignorieren */ }
+    };
+
+    // Nur https-Links bzw. relative Bildpfade (z. B. bilder/tasse.jpg) zulassen
+    const safeUrl = (value, allowRelative) => {
+      const u = String(value || "").trim();
+      if (!u) return "";
+      if (/^https?:\/\//i.test(u)) return u;
+      if (allowRelative && /^[\w\-./%]+$/.test(u) && !u.startsWith("/")) return u;
+      return "";
+    };
+
+    const el = (tag, className, text) => {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text) node.textContent = text;
+      return node;
+    };
+
+    async function giftApi(body) {
+      const response = await fetch(RSVP_ENDPOINT, { method: "POST", body: JSON.stringify(body) });
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error || "Unbekannter Fehler");
+      return data;
     }
 
-    const data = JSON.parse(e.postData.contents);
-
-    // Spam-Schutz (Honeypot)
-    if (data.website) {
-      return json_({ ok: true, spam: true });
+    async function reserveGift(gift, button) {
+      if (!confirm("„" + gift.name + "“ für euch reservieren?")) return;
+      button.disabled = true;
+      giftStatus.textContent = "";
+      try {
+        const data = await giftApi({ action: "reserveGift", id: gift.id });
+        const codes = loadCodes();
+        codes[gift.id] = data.code;
+        saveCodes(codes);
+        giftStatus.textContent =
+          "Reserviert! Euer Freigabecode: " + data.code +
+          " – bitte notieren, falls ihr die Reservierung später aufheben möchtet.";
+      } catch (error) {
+        giftStatus.textContent = error.message;
+      }
+      await loadGifts();
     }
 
-    // Geschenkeliste: Reservieren / Freigeben
-    if (data.action === "reserveGift") return reserveGift_(data);
-    if (data.action === "releaseGift") return releaseGift_(data);
-
-    // Antwort prüfen
-    const answer = String(data.attendance || "").trim().toLowerCase();
-    if (answer !== "yes" && answer !== "no") {
-      throw new Error("Ungültige Rückmeldung: " + JSON.stringify(data.attendance));
-    }
-    const isYes = answer === "yes";
-    const attendance = isYes ? "Zusage" : "Absage";
-
-    // Personen prüfen
-    const attendees = Array.isArray(data.attendees) ? data.attendees : [];
-    if (attendees.length === 0) {
-      throw new Error("Bitte mindestens eine Person mit Namen angeben.");
-    }
-    if (attendees.length > MAX_PERSONS) {
-      throw new Error("Zu viele Personen in einer Rückmeldung.");
+    async function releaseGift(code, button) {
+      if (button) button.disabled = true;
+      giftStatus.textContent = "";
+      try {
+        await giftApi({ action: "releaseGift", code });
+        const codes = loadCodes();
+        Object.keys(codes).forEach(id => { if (codes[id] === code) delete codes[id]; });
+        saveCodes(codes);
+        giftStatus.textContent = "Die Reservierung wurde aufgehoben.";
+      } catch (error) {
+        giftStatus.textContent = error.message;
+      }
+      await loadGifts();
     }
 
-    const timestamp = new Date();
-    const groupId = Utilities.getUuid();
+    function renderGifts(gifts) {
+      giftList.replaceChildren();
+      const codes = loadCodes();
 
-    // Nachricht nur bei Absage
-    const message = isYes ? "" : clean_(data.message);
-
-    const rows = attendees.map((person, index) => {
-      const name = clean_(person && person.name);
-      if (!name) {
-        throw new Error("Bei jeder Person muss ein Name angegeben werden.");
+      if (!gifts.length) {
+        giftList.append(el("p", "hint", "Die Wunschliste wird bald ergänzt."));
+        return;
       }
 
-      // Essenswünsche nur bei Zusage (alte Felder food/allergies werden weiter unterstützt)
-      const food = isYes
-        ? clean_(
-            person.foodAndAllergies ||
-            [person.food, person.allergies].filter(Boolean).join("; ")
-          )
-        : "";
+      gifts.forEach(gift => {
+        const myCode = gift.taken ? codes[gift.id] : null;
+        if (!gift.taken && codes[gift.id]) delete codes[gift.id]; // veralteter Code
 
-      return [
-        timestamp,                    // A
-        attendance,                   // B
-        name,                         // C
-        food,                         // D
-        index === 0 ? message : "",   // E  (nur einmal pro Rückmeldung)
-        groupId                       // F
-      ];
+        const card = el("article", "gift-card" + (gift.taken ? (myCode ? " mine" : " taken") : ""));
+
+        const imageUrl = safeUrl(gift.image, true);
+        if (imageUrl) {
+          const img = el("img", "gift-img");
+          img.src = imageUrl;
+          img.alt = gift.name;
+          img.loading = "lazy";
+          card.append(img);
+        } else {
+          const ph = el("div", "placeholder gift-placeholder");
+          ph.append(el("b", "", "♡"));
+          card.append(ph);
+        }
+
+        const body = el("div", "gift-body");
+        body.append(el("h3", "", gift.name));
+        if (gift.description) body.append(el("p", "", gift.description));
+        if (gift.price) body.append(el("p", "gift-price", gift.price));
+
+        const actions = el("div", "gift-actions");
+        const linkUrl = safeUrl(gift.link, false);
+
+        if (!gift.taken) {
+          if (linkUrl) {
+            const a = el("a", "button outline", "Ansehen ↗");
+            a.href = linkUrl; a.target = "_blank"; a.rel = "noopener";
+            actions.append(a);
+          }
+          const btn = el("button", "button dark", "Reservieren");
+          btn.type = "button";
+          btn.addEventListener("click", () => reserveGift(gift, btn));
+          actions.append(btn);
+        } else if (myCode) {
+          const box = el("div", "gift-code", "Von euch reserviert. Freigabecode:");
+          box.append(el("strong", "", myCode));
+          actions.append(box);
+          const btn = el("button", "button outline", "Reservierung aufheben");
+          btn.type = "button";
+          btn.addEventListener("click", () => releaseGift(myCode, btn));
+          actions.append(btn);
+        } else {
+          const btn = el("button", "button outline", "Bereits reserviert");
+          btn.type = "button";
+          btn.disabled = true;
+          actions.append(btn);
+        }
+
+        body.append(actions);
+        card.append(body);
+        giftList.append(card);
+      });
+
+      saveCodes(codes);
+    }
+
+    async function loadGifts() {
+      try {
+        const response = await fetch(RSVP_ENDPOINT + "?action=gifts");
+        const data = await response.json();
+        if (!data.ok) throw new Error(data.error || "Unbekannter Fehler");
+        renderGifts(data.gifts);
+      } catch (error) {
+        console.error(error);
+        giftList.replaceChildren(
+          el("p", "hint", "Die Wunschliste konnte leider nicht geladen werden. Bitte versucht es später erneut.")
+        );
+      }
+    }
+
+    document.getElementById("release-btn").addEventListener("click", () => {
+      const input = document.getElementById("release-code");
+      const code = input.value.trim().toUpperCase();
+      if (!code) { giftStatus.textContent = "Bitte gebt euren Freigabecode ein."; return; }
+      releaseGift(code, null).then(() => { input.value = ""; });
     });
 
-    // Alles Schreiben unter Lock, auch das Anlegen der Überschriften
-    const lock = LockService.getScriptLock();
-    lock.waitLock(15000);
+    loadGifts();
+  }
+
+  // RSVP-Formular
+  const form = document.getElementById("rsvp");
+  if (!form) return;
+
+  const attendees = document.getElementById("attendees");
+  const addButton = document.getElementById("add-guest");
+  const result = document.getElementById("result");
+  const messageField = document.getElementById("message-field");
+
+  function isAttending() {
+    return form.querySelector('input[name="attendance"]:checked').value === "yes";
+  }
+
+  // Zusage: Essenswünsche sichtbar | Absage: Nachrichtenfeld sichtbar
+  function updateAttendanceFields() {
+    const attending = isAttending();
+    attendees.querySelectorAll(".food-field").forEach(el => { el.hidden = !attending; });
+    messageField.hidden = attending;
+    attendees.querySelectorAll(".attendee-name").forEach(el => { el.required = true; });
+  }
+
+  // Nummerierung nach Hinzufügen/Entfernen neu setzen
+  function renumberAttendees() {
+    attendees.querySelectorAll(".attendee-entry").forEach((entry, i) => {
+      const n = i + 1;
+      const title = entry.querySelector(".attendee-title");
+      if (title) title.textContent = "Person " + n;
+      entry.querySelector(".name-label-text").textContent = "Name der Person " + n;
+    });
+  }
+
+  form.querySelectorAll('input[name="attendance"]').forEach(r => {
+    r.addEventListener("change", updateAttendanceFields);
+  });
+
+  updateAttendanceFields();
+
+  // Weitere Personen hinzufügen
+  addButton.addEventListener("click", () => {
+    const card = document.createElement("article");
+    card.className = "attendee-entry";
+
+    card.innerHTML = `
+      <div class="guest-heading">
+        <strong class="attendee-title"></strong>
+        <button type="button" class="remove-guest" aria-label="Person entfernen">Entfernen</button>
+      </div>
+
+      <label>
+        <span class="name-label-text"></span>
+        <input
+          class="attendee-name"
+          type="text"
+          required
+          maxlength="100"
+          placeholder="Vor- und Nachname">
+      </label>
+
+      <label class="food-field">
+        Essenswünsche und Unverträglichkeiten (optional)
+        <textarea
+          class="attendee-food-allergies"
+          rows="3"
+          maxlength="1000"
+          placeholder="z. B. vegetarisch, vegan oder Unverträglichkeiten"></textarea>
+      </label>
+    `;
+
+    card.querySelector(".remove-guest").addEventListener("click", () => {
+      card.remove();
+      renumberAttendees();
+    });
+
+    attendees.appendChild(card);
+    renumberAttendees();
+    updateAttendanceFields();
+    card.querySelector("input").focus();
+  });
+
+  // Formular absenden
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    result.textContent = "";
+
+    const honeypot = document.getElementById("website").value;
+    if (honeypot) return;
+
+    const attending = isAttending();
+
+    const payload = {
+      attendance: attending ? "yes" : "no",
+
+      // Nachricht nur bei Absage, Essenswünsche nur bei Zusage
+      message: attending ? "" : document.getElementById("message").value.trim(),
+
+      attendees: [...attendees.querySelectorAll(".attendee-entry")]
+        .map(entry => ({
+          name: entry.querySelector(".attendee-name").value.trim(),
+          foodAndAllergies: attending
+            ? entry.querySelector(".attendee-food-allergies").value.trim()
+            : ""
+        }))
+        .filter(person => person.name),
+
+      submittedAt: new Date().toISOString(),
+      website: honeypot
+    };
+
+    if (payload.attendees.length === 0) {
+      result.textContent = "Bitte tragt mindestens eine Person mit Namen ein.";
+      attendees.querySelector(".attendee-name")?.focus();
+      return;
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Wird gesendet …";
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
 
     try {
-      const sheet = getSheet_();
-      const firstRow = nextFreeRow_(sheet);
+      // Kein "no-cors": nur so kann die Antwort des Skripts gelesen werden.
+      // Ohne eigenen Content-Type wird text/plain gesendet (kein Preflight nötig).
+      const response = await fetch(RSVP_ENDPOINT, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
 
-      // Spalten B–F als Text formatieren: verhindert Formel-Auswertung
-      // und automatische Umwandlungen (Datum, Zahl)
-      sheet.getRange(firstRow, 2, rows.length, HEADERS.length - 1).setNumberFormat("@");
-      sheet.getRange(firstRow, 1, rows.length, 1).setNumberFormat("dd.MM.yyyy HH:mm:ss");
+      const data = await response.json();
 
-      sheet.getRange(firstRow, 1, rows.length, HEADERS.length).setValues(rows);
-      SpreadsheetApp.flush();
-    } finally {
-      lock.releaseLock();
-    }
-
-    return json_({ ok: true, count: rows.length, answer: attendance, groupId: groupId });
-
-  } catch (err) {
-    console.error(err);
-    return json_({ ok: false, error: String(err.message || err) });
-  }
-}
-
-
-// ==========================================
-// GESCHENKELISTE (anonym)
-// ==========================================
-// Blatt "Geschenkeliste" mit den Spalten:
-// A ID | B Wunsch | C Beschreibung | D Preis | E Link | F Bild | G Status | H Freigabe-Hash
-// Es wird nie gespeichert, WER reserviert hat. Spalte H enthält nur einen
-// Hash des Freigabecodes, den der Gast beim Reservieren erhält.
-
-const GIFT_SHEET = "Geschenkeliste";
-const GIFT_HEADERS = ["ID", "Wunsch", "Beschreibung", "Preis", "Link", "Bild", "Status", "Freigabe-Hash"];
-const GIFT_TAKEN = "reserviert";
-const GIFT_FREE = "frei";
-
-// EINMALIG im Editor ausführen: legt das Blatt mit Beispielzeilen an
-function setupGifts() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  if (ss.getSheetByName(GIFT_SHEET)) {
-    Logger.log("Das Blatt '" + GIFT_SHEET + "' existiert bereits.");
-    return;
-  }
-  const sheet = ss.insertSheet(GIFT_SHEET);
-  sheet.getRange(1, 1, 1, GIFT_HEADERS.length).setValues([GIFT_HEADERS]).setFontWeight("bold");
-  sheet.setFrozenRows(1);
-  sheet.getRange(2, 8, sheet.getMaxRows() - 1, 1).setNumberFormat("@");
-  sheet.getRange(2, 7, sheet.getMaxRows() - 1, 1).setDataValidation(
-    SpreadsheetApp.newDataValidation().requireValueInList([GIFT_FREE, GIFT_TAKEN], true).build()
-  );
-  sheet.getRange(2, 1, 2, GIFT_HEADERS.length).setValues([
-    ["", "Beispiel: Kaffeemaschine", "Für gemütliche Sonntagsfrühstücke", "ca. 80 €", "https://www.example.com", "bilder/kaffeemaschine.jpg", GIFT_FREE, ""],
-    ["", "Beispiel: Bettwäsche", "Weiß oder Naturtöne, 135×200", "ca. 50 €", "", "", GIFT_FREE, ""]
-  ]);
-  sheet.setColumnWidth(2, 200);
-  sheet.setColumnWidth(3, 280);
-  sheet.setColumnWidth(5, 220);
-  sheet.setColumnWidth(6, 200);
-  sheet.hideColumns(8);
-}
-
-function getGiftSheet_() {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(GIFT_SHEET);
-  if (!sheet) throw new Error("Das Blatt '" + GIFT_SHEET + "' fehlt. Bitte setupGifts() ausführen.");
-  return sheet;
-}
-
-function hashCode_(code) {
-  const bytes = Utilities.computeDigest(
-    Utilities.DigestAlgorithm.SHA_256,
-    String(code).trim().toUpperCase()
-  );
-  return bytes.map(b => ("0" + (b & 0xff).toString(16)).slice(-2)).join("");
-}
-
-function newGiftCode_() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ohne 0/O, 1/I
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-  }
-  return code;
-}
-
-// Liste für die Webseite (ohne Hashes). Fehlende IDs werden automatisch ergänzt.
-function listGifts_() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(GIFT_SHEET);
-  if (!sheet || sheet.getLastRow() < 2) return [];
-
-  const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
-  try {
-    const n = sheet.getLastRow() - 1;
-    const values = sheet.getRange(2, 1, n, GIFT_HEADERS.length).getValues();
-
-    let changed = false;
-    values.forEach(r => {
-      if (String(r[1]).trim() && !String(r[0]).trim()) {
-        r[0] = Utilities.getUuid().slice(0, 8);
-        changed = true;
+      if (!data.ok) {
+        throw new Error(data.error || "Unbekannter Fehler");
       }
-    });
-    if (changed) {
-      sheet.getRange(2, 1, n, 1).setValues(values.map(r => [r[0]]));
-    }
 
-    return values
-      .filter(r => String(r[1]).trim())
-      .map(r => ({
-        id: String(r[0]).trim(),
-        name: String(r[1]).trim(),
-        description: String(r[2]).trim(),
-        price: String(r[3]).trim(),
-        link: String(r[4]).trim(),
-        image: String(r[5]).trim(),
-        taken: String(r[6]).trim().toLowerCase() === GIFT_TAKEN
-      }));
-  } finally {
-    lock.releaseLock();
-  }
-}
+      result.textContent = attending
+        ? "Vielen Dank! Eure Zusage ist angekommen – wir freuen uns auf euch!"
+        : "Vielen Dank für eure Rückmeldung. Schade, dass ihr nicht dabei sein könnt!";
 
-function reserveGift_(data) {
-  const id = String(data.id || "").trim();
-  if (!id) throw new Error("Kein Wunsch angegeben.");
+      // Formular zurücksetzen: nur Person 1 behalten
+      [...attendees.querySelectorAll(".attendee-entry")].slice(1).forEach(c => c.remove());
+      form.reset();
+      renumberAttendees();
+      updateAttendanceFields();
+      result.scrollIntoView({ behavior: "smooth", block: "center" });
 
-  const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    const sheet = getGiftSheet_();
-    if (sheet.getLastRow() < 2) throw new Error("Wunsch nicht gefunden.");
+    } catch (error) {
+      console.error(error);
+      result.textContent =
+        "Das Senden hat leider nicht funktioniert. Bitte versucht es später erneut oder meldet euch direkt bei Jakob und Tina.";
 
-    const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, GIFT_HEADERS.length).getValues();
-    const idx = values.findIndex(r => String(r[0]).trim() === id);
-    if (idx < 0) throw new Error("Wunsch nicht gefunden.");
-
-    if (String(values[idx][6]).trim().toLowerCase() === GIFT_TAKEN) {
-      throw new Error("Dieser Wunsch wurde gerade schon von jemand anderem reserviert.");
-    }
-
-    // eindeutigen Code erzeugen
-    const existing = values.map(r => String(r[7]));
-    let code, hash;
-    do {
-      code = newGiftCode_();
-      hash = hashCode_(code);
-    } while (existing.indexOf(hash) >= 0);
-
-    const row = idx + 2;
-    sheet.getRange(row, 8).setNumberFormat("@");
-    sheet.getRange(row, 7, 1, 2).setValues([[GIFT_TAKEN, hash]]);
-    SpreadsheetApp.flush();
-
-    return json_({ ok: true, code: code });
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-function releaseGift_(data) {
-  const code = String(data.code || "").trim();
-  if (!code) throw new Error("Bitte einen Freigabecode angeben.");
-  const hash = hashCode_(code);
-
-  const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    const sheet = getGiftSheet_();
-    if (sheet.getLastRow() < 2) throw new Error("Dieser Code ist nicht bekannt.");
-
-    const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, GIFT_HEADERS.length).getValues();
-    const idx = values.findIndex(r =>
-      String(r[7]) === hash && String(r[6]).trim().toLowerCase() === GIFT_TAKEN
-    );
-    if (idx < 0) throw new Error("Dieser Code ist nicht bekannt oder bereits freigegeben.");
-
-    sheet.getRange(idx + 2, 7, 1, 2).setValues([[GIFT_FREE, ""]]);
-    SpreadsheetApp.flush();
-
-    return json_({ ok: true });
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-
-// ==========================================
-// TABELLENBLATT HOLEN / ANLEGEN
-// ==========================================
-// Stimmen die Überschriften in Zeile 1 nicht mit HEADERS überein
-// (z. B. alte Struktur), wird das alte Blatt umbenannt (nichts geht verloren)
-// und ein frisches Blatt mit korrekten Spalten angelegt.
-
-function getSheet_() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = ss.getSheetByName(SHEET_NAME);
-
-  if (sheet && sheet.getLastRow() > 0) {
-    const first = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
-    const matches = HEADERS.every((h, i) => String(first[i]).trim() === h);
-
-    if (!matches) {
-      const stamp = Utilities.formatDate(new Date(), TIME_ZONE, "yyyy-MM-dd HH-mm");
-      sheet.setName(SHEET_NAME + " (alt " + stamp + ")");
-      sheet = null;
-    }
-  }
-
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-  }
-
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
-    sheet.setFrozenRows(1);
-  }
-
-  return sheet;
-}
-
-
-// ==========================================
-// NÄCHSTE FREIE ZEILE (anhand Spalte A)
-// ==========================================
-// getLastRow() zählt jede beschriftete Zelle im Blatt mit (z. B. Notizen in
-// Spalte H) und würde neue Zeilen zu weit unten einfügen.
-
-function nextFreeRow_(sheet) {
-  const values = sheet.getRange(1, 1, sheet.getMaxRows(), 1).getValues();
-  for (let i = values.length - 1; i >= 0; i--) {
-    if (values[i][0] !== "" && values[i][0] !== null) {
-      return i + 2;
-    }
-  }
-  return 2;
-}
-
-
-// ==========================================
-// EINGABEN BEREINIGEN
-// ==========================================
-
-function clean_(value) {
-  return String(value == null ? "" : value).trim().slice(0, 1000);
-  // Formelschutz erfolgt über das Textformat "@" der Zielzellen
-}
-
-
-// ==========================================
-// JSON-ANTWORT
-// ==========================================
-
-function json_(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-
-// ==========================================
-// TESTS (im Editor auswählen und "Ausführen")
-// ==========================================
-
-function testZusage() {
-  const result = doPost({
-    postData: {
-      contents: JSON.stringify({
-        attendance: "yes",
-        attendees: [
-          { name: "Testperson Zusage 1", foodAndAllergies: "Vegetarisch, keine Nüsse" },
-          { name: "Testperson Zusage 2", foodAndAllergies: "" }
-        ],
-        message: "",
-        website: ""
-      })
+    } finally {
+      clearTimeout(timeout);
+      submitButton.disabled = false;
+      submitButton.textContent = "Rückmeldung absenden";
     }
   });
-  Logger.log(result.getContent());
-}
+})();
+</script>
 
-function testAbsage() {
-  const result = doPost({
-    postData: {
-      contents: JSON.stringify({
-        attendance: "no",
-        attendees: [
-          { name: "Testperson Absage 1", foodAndAllergies: "" },
-          { name: "Testperson Absage 2", foodAndAllergies: "" }
-        ],
-        message: "Leider können wir nicht kommen.",
-        website: ""
-      })
-    }
-  });
-  Logger.log(result.getContent());
-}
+</body>
+</html>

@@ -47,8 +47,15 @@
   height: 1px;
   overflow: hidden;
 }
-/* Geschenkeliste */
-.gift-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
+
+/* Fotos */
+img.hero-image { display: block; object-fit: cover; }
+img.portrait { display: block; width: 100%; object-fit: cover; object-position: center 30%; }
+.gallery img { display: block; width: 100%; height: 220px; object-fit: cover; }
+@media (max-width: 760px) { .gallery img { height: 120px; } }
+
+/* Geschenkeliste (in der FAQ) */
+.faqs .gift-grid { max-width: 1000px; margin: 22px auto 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
 .gift-card { background: #fbfaf6; border: 1px solid #d9ddcf; display: flex; flex-direction: column; }
 .gift-card.taken { opacity: .6; }
 .gift-card.mine { opacity: 1; border-color: #89927b; }
@@ -63,12 +70,13 @@
 .gift-actions .button:disabled { opacity: .6; cursor: not-allowed; }
 .gift-code { background: #e7eadd; padding: 10px 12px; font-size: 12px; color: #59634f; }
 .gift-code strong { display: block; font-size: 20px; letter-spacing: .16em; }
-#gift-status { max-width: 1000px; margin: 22px auto 0; text-align: center; color: #59634f; font-size: 14px; }
-.gift-release { max-width: 480px; margin: 34px auto 0; border-top: 1px solid #d9ddcf; padding-top: 18px; }
-.gift-release summary { cursor: pointer; font-size: 13px; color: #59634f; }
+#gift-status { margin: 22px 0 0; text-align: center; color: #59634f; font-size: 14px; }
+.gift-release { max-width: 480px; margin: 30px auto 0; border-top: 1px solid #d9ddcf; padding-top: 18px; }
+.gift-release .gift-release-title { margin: 0; font-size: 13px; font-weight: 700; color: #59634f; }
 .gift-release-row { display: flex; gap: 8px; margin-top: 14px; }
 .gift-release-row input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #d9ddcf; background: #fffefa; font: 13px "DM Sans", sans-serif; text-transform: uppercase; letter-spacing: .1em; }
 .gift-release-row .button { min-height: 44px; }
+
 #rsvp [hidden] { display: none !important; }
 #rsvp button:disabled {
   opacity: .65;
@@ -87,7 +95,7 @@
     <a href="#faq">FAQ</a>
     <a href="#rueckmeldung">Rückmeldung</a>
     <a href="#kontakt">Kontakt</a>
-    <a href="#geschenke">Geschenke</a>
+    <a href="#faq-geschenke" class="open-faq">Geschenke</a>
     <a href="#fotos">Fotos</a>
   </nav>
 </header>
@@ -95,11 +103,7 @@
 <main>
 
 <section class="hero section" id="start">
-  <div class="placeholder hero-image">
-    <b>♡</b>
-    <span>Platzhalter für euer gemeinsames Foto</span>
-    <small>Hier später euer Lieblingsbild einsetzen</small>
-  </div>
+  <img class="hero-image" src="bilder/01_Titelbild.JPG" alt="Jakob und Tina" fetchpriority="high">
 
   <p class="eyebrow">WIR HEIRATEN</p>
   <h1>Jakob <i>&</i> Tina</h1>
@@ -191,13 +195,30 @@
       <p>Kommt wie ihr wollt, aber schön. Wir möchten, dass ihr euch wohlfühlt!</p>
     </details>
 
-    <details>
+    <details id="faq-geschenke">
       <summary>Was wünschen wir uns zur Hochzeit?</summary>
       <p>
-        Wir freuen uns vor allem, wenn ihr dabei seid! Wenn ihr eine Geschenkidee habt,
-        freuen wir uns natürlich darüber. Falls nicht, findet ihr unter
-        <a href="#geschenke">Geschenkeliste</a> ein paar Wünsche für unseren gemeinsamen Haushalt.
+        Wir freuen uns vor allem, wenn ihr dabei seid! Falls ihr uns trotzdem eine Freude
+        machen möchtet, haben wir hier ein paar Wünsche für unseren gemeinsamen Haushalt
+        gesammelt. Reserviert euch einen Wunsch, damit er nicht doppelt geschenkt wird.
       </p>
+
+      <div id="gift-list" class="gift-grid" aria-live="polite">
+        <p class="hint">Wunschliste wird geladen …</p>
+      </div>
+      <p id="gift-status" role="status" aria-live="polite"></p>
+
+      <div class="gift-release">
+        <p class="gift-release-title">Reservierung mit Freigabecode aufheben</p>
+        <p class="hint">
+          Die Reservierung ist anonym – wir sehen nicht, wer was ausgewählt hat. Den Code erhaltet ihr
+          beim Reservieren. Auf demselben Gerät findet ihr die Freigabe auch direkt beim Wunsch.
+        </p>
+        <div class="gift-release-row">
+          <input type="text" id="release-code" maxlength="12" placeholder="Freigabecode" autocomplete="off" aria-label="Freigabecode">
+          <button type="button" id="release-btn" class="button outline">Freigeben</button>
+        </div>
+      </div>
     </details>
 
     <details id="faq-sektempfang">
@@ -313,21 +334,21 @@
 
   <div class="contacts">
     <article>
-      <div class="placeholder portrait"><b>♡</b><small>Foto von Jakob & Tina</small></div>
+      <img class="portrait" src="bilder/02_JakobundTina.JPG" alt="Jakob und Tina" loading="lazy">
       <h3>Jakob & Tina</h3>
       <p>Das Brautpaar</p>
       <small>Kontaktdaten folgen</small>
     </article>
 
     <article>
-      <div class="placeholder portrait"><b>✳</b><small>Foto von Pascal</small></div>
+      <img class="portrait" src="bilder/02_Pascal.JPG" alt="Pascal" loading="lazy">
       <h3>Pascal</h3>
       <p>Trauzeuge</p>
       <small>Ansprechpartner für Programm & Überraschungen<br>Kontaktdaten folgen</small>
     </article>
 
     <article>
-      <div class="placeholder portrait"><b>✳</b><small>Foto von Lydia</small></div>
+      <img class="portrait" src="bilder/02_Lydia.JPG" alt="Lydia" loading="lazy">
       <h3>Lydia</h3>
       <p>Trauzeugin</p>
       <small>Ansprechpartnerin für Programm & Überraschungen<br>Kontaktdaten folgen</small>
@@ -335,36 +356,7 @@
   </div>
 </section>
 
-<section class="section tint" id="geschenke">
-  <div class="heading">
-    <p class="eyebrow">EINE KLEINIGKEIT FÜR UNS</p>
-    <h2>Geschenkeliste</h2>
-    <p>
-      Das schönste Geschenk ist, dass ihr mit uns feiert. Falls ihr uns trotzdem eine Freude
-      machen möchtet, haben wir hier ein paar Wünsche für unseren gemeinsamen Haushalt gesammelt.
-      Reserviert euch einen Wunsch, damit er nicht doppelt geschenkt wird.
-    </p>
-  </div>
-
-  <div id="gift-list" class="gift-grid" aria-live="polite">
-    <p class="hint">Wunschliste wird geladen …</p>
-  </div>
-  <p id="gift-status" role="status" aria-live="polite"></p>
-
-  <details class="gift-release">
-    <summary>Reservierung mit Freigabecode aufheben</summary>
-    <p class="hint">
-      Die Reservierung ist anonym – wir sehen nicht, wer was ausgewählt hat. Den Code erhaltet ihr
-      beim Reservieren. Auf demselben Gerät findet ihr die Freigabe auch direkt beim Wunsch.
-    </p>
-    <div class="gift-release-row">
-      <input type="text" id="release-code" maxlength="12" placeholder="Freigabecode" autocomplete="off" aria-label="Freigabecode">
-      <button type="button" id="release-btn" class="button outline">Freigeben</button>
-    </div>
-  </details>
-</section>
-
-<section class="section" id="fotos">
+<section class="section tint" id="fotos">
   <div class="heading">
     <p class="eyebrow">ERINNERUNGEN</p>
     <h2>Unser Hochzeitstag in Bildern</h2>
@@ -375,9 +367,9 @@
   <p class="hint">Der Google-Drive-Link zum Hochladen wird hier ergänzt.</p>
 
   <div class="gallery">
-    <div class="placeholder"><b>♡</b><small>Foto 1</small></div>
-    <div class="placeholder"><b>✳</b><small>Foto 2</small></div>
-    <div class="placeholder"><b>♡</b><small>Foto 3</small></div>
+    <img src="bilder/03_1.JPG" alt="Foto 1" loading="lazy">
+    <img src="bilder/03_2.JPG" alt="Foto 2" loading="lazy">
+    <img src="bilder/03_3.JPG" alt="Foto 3" loading="lazy">
   </div>
 </section>
 
@@ -407,22 +399,26 @@
     });
   }
 
-  // Fingerfood-FAQ öffnen und dorthin scrollen
-  function openFingerfoodFaq(event) {
+  // FAQ-Eintrag öffnen und dorthin scrollen (Fingerfood, Geschenke)
+  function openFaq(event) {
     event.preventDefault();
 
-    const faq = document.getElementById("faq-sektempfang");
+    const id = (event.currentTarget.getAttribute("href") || "").slice(1);
+    const faq = document.getElementById(id);
     if (!faq) return;
 
     faq.open = true;
 
     setTimeout(() => {
-      faq.scrollIntoView({ behavior: "smooth", block: "center" });
+      faq.scrollIntoView({
+        behavior: "smooth",
+        block: id === "faq-geschenke" ? "start" : "center"
+      });
     }, 100);
   }
 
-  document.querySelectorAll(".open-fingerfood-faq").forEach(link => {
-    link.addEventListener("click", openFingerfoodFaq);
+  document.querySelectorAll(".open-fingerfood-faq, .open-faq").forEach(link => {
+    link.addEventListener("click", openFaq);
   });
 
   // Countdown
@@ -574,7 +570,7 @@
           actions.append(btn);
 
         } else if (myCode) {
-          const box = el("div", "gift-code", "Reservierung Erfolgreich. Freigabecode:");
+          const box = el("div", "gift-code", "Reservierung erfolgreich. Freigabecode:");
           box.append(el("strong", "", myCode));
           actions.append(box);
 
@@ -785,7 +781,7 @@
         link.href = "#faq-sektempfang";
         link.className = "rsvp-faq-link open-fingerfood-faq";
         link.textContent = "Über Beiträge zum Fingerfood freuen wir uns!";
-        link.addEventListener("click", openFingerfoodFaq);
+        link.addEventListener("click", openFaq);
 
         result.append(link);
 

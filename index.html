@@ -49,7 +49,12 @@
 }
 
 /* Fotos */
-img.hero-image { display: block; object-fit: cover; }
+img.hero-image {
+  display: block;
+  object-fit: cover;
+  width: min(1000px, 100%);
+  height: clamp(240px, 48vw, 560px);
+}
 img.portrait { display: block; width: 100%; object-fit: cover; object-position: center 30%; }
 .gallery img { display: block; width: 100%; height: 220px; object-fit: cover; }
 @media (max-width: 760px) { .gallery img { height: 120px; } }

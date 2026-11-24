@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f5f1e9">
+<meta name="theme-color" content="#dce0d5">
 <meta name="description" content="Die Hochzeit von Jakob und Tina am 25. September 2027">
 <title>Jakob & Tina – 25.09.2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 
 <style>
 #rsvp .attendee-entry {
-  border: 1px solid rgba(95,105,82,.22);
+  border: 1px solid rgba(20,20,20,.2);
   border-radius: 12px;
   padding: 1rem;
   margin: 1rem 0;
@@ -49,37 +49,32 @@
 }
 
 /* Fotos */
-img.hero-image {
-  display: block;
-  object-fit: cover;
-  width: min(1000px, 100%);
-  height: clamp(240px, 48vw, 560px);
-}
+img.hero-image { display: block; object-fit: cover; width: min(1000px, 100%); height: clamp(240px, 48vw, 560px); }
 img.portrait { display: block; width: 100%; object-fit: cover; object-position: center 30%; }
 .gallery img { display: block; width: 100%; height: 220px; object-fit: cover; }
 @media (max-width: 760px) { .gallery img { height: 120px; } }
 
 /* Geschenkeliste (in der FAQ) */
 .faqs .gift-grid { max-width: 1000px; margin: 22px auto 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
-.gift-card { background: #fbfaf6; border: 1px solid #d9ddcf; display: flex; flex-direction: column; }
+.gift-card { background: #e9ebe4; border: 1px solid #a3aa94; display: flex; flex-direction: column; }
 .gift-card.taken { opacity: .6; }
-.gift-card.mine { opacity: 1; border-color: #89927b; }
-.gift-card .gift-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eee9df; }
-.gift-card .gift-placeholder { aspect-ratio: 4 / 3; border: 0; border-bottom: 1px solid #e2dfd4; }
+.gift-card.mine { opacity: 1; border-color: #b8923a; }
+.gift-card .gift-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #d0d4c6; }
+.gift-card .gift-placeholder { aspect-ratio: 4 / 3; border: 0; border-bottom: 1px solid #aab19b; }
 .gift-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .gift-body h3 { font: 400 22px "Playfair Display", serif; margin: 0; }
-.gift-body p { margin: 0; color: #73786d; font-size: 13px; }
-.gift-body .gift-price { font-size: 12px; letter-spacing: .06em; color: #69745e; font-weight: 700; }
+.gift-body p { margin: 0; color: #2b2b27; font-size: 13px; }
+.gift-body .gift-price { font-size: 12px; letter-spacing: .06em; color: #6b4f0f; font-weight: 700; }
 .gift-actions { margin-top: auto; padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .gift-actions .button { width: 100%; min-height: 42px; }
 .gift-actions .button:disabled { opacity: .6; cursor: not-allowed; }
-.gift-code { background: #e7eadd; padding: 10px 12px; font-size: 12px; color: #59634f; }
+.gift-code { background: #dce0d5; padding: 10px 12px; font-size: 12px; color: #141414; }
 .gift-code strong { display: block; font-size: 20px; letter-spacing: .16em; }
-#gift-status { margin: 22px 0 0; text-align: center; color: #59634f; font-size: 14px; }
-.gift-release { max-width: 480px; margin: 30px auto 0; border-top: 1px solid #d9ddcf; padding-top: 18px; }
-.gift-release .gift-release-title { margin: 0; font-size: 13px; font-weight: 700; color: #59634f; }
+#gift-status { margin: 22px 0 0; text-align: center; color: #141414; font-size: 14px; }
+.gift-release { max-width: 480px; margin: 30px auto 0; border-top: 1px solid #a3aa94; padding-top: 18px; }
+.gift-release .gift-release-title { margin: 0; font-size: 13px; font-weight: 700; color: #141414; }
 .gift-release-row { display: flex; gap: 8px; margin-top: 14px; }
-.gift-release-row input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #d9ddcf; background: #fffefa; font: 13px "DM Sans", sans-serif; text-transform: uppercase; letter-spacing: .1em; }
+.gift-release-row input { flex: 1; min-width: 0; padding: 12px; border: 1px solid #a3aa94; background: #f3f5ee; font: 13px "DM Sans", sans-serif; text-transform: uppercase; letter-spacing: .1em; }
 .gift-release-row .button { min-height: 44px; }
 
 #rsvp [hidden] { display: none !important; }
